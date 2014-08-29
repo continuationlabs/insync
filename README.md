@@ -1,4 +1,3 @@
-nsync
-=====
+# nasync
 
-Fork of async that focuses strictly on node
+Port of [async](https://github.com/caolan/async) that focuses strictly on node.js.
