@@ -1,0 +1,31 @@
+{
+  "name": "nsync",
+  "description": "Higher-order functions and common patterns for asynchronous code. Node specific fork of async.",
+  "main": "index",
+  "author": "Colin Ihrig <cjihrig@gmail.com> (http://www.cjihrig.com/)",
+  "version": "0.0.1",
+  "homepage": "https://github.com/cjihrig/nsync",
+  "repository" : {
+      "type" : "git",
+      "url" : "https://github.com/cjihrig/nsync.git"
+  },
+  "bugs" : {
+      "url" : "https://github.com/cjihrig/nsync/issues"
+  },
+  "licenses" : [
+      {
+          "type" : "MIT",
+          "url" : "https://github.com/caolan/async/raw/master/LICENSE"
+      }
+  ],
+  "devDependencies": {
+      "lab": "4.x.x"
+  },
+  "scripts": {
+  },
+  "keywords": [
+    "async",
+    "asynchronous",
+    "higher-order"
+  ]
+}
