@@ -41,7 +41,7 @@ var expect = Lab.expect;
 
 describe('Async', function () {
 
-    describe('Collections', function () {
+    describe('Collection', function () {
 
         describe('#each', function () {
 
@@ -53,7 +53,6 @@ describe('Async', function () {
 
                     expect(error).to.not.exist;
                     expect(result).to.deep.equal([1, 2, 3, 4]);
-
                     done();
                 });
             });
@@ -64,9 +63,8 @@ describe('Async', function () {
 
                 Common.noop = function (error) {
 
-                    expect(error).to.not.exist;
                     Common.noop = noop;
-
+                    expect(error).to.not.exist;
                     done();
                 };
 
@@ -94,15 +92,14 @@ describe('Async', function () {
 
                     expect(error).to.exist;
                     expect(error.message).to.equal('async error');
-
                     done();
                 });
             });
         });
 
-        describe('#eachSerires', function () {
+        describe('#eachSeries', function () {
 
-            it('iterates over a collection of items in a series', function (done) {
+            it('iterates over a collection of items in series', function (done) {
 
                 var result = [];
 
@@ -110,7 +107,6 @@ describe('Async', function () {
 
                     expect(error).to.not.exist;
                     expect(result).to.deep.equal([1, 3, 2]);
-
                     done();
                 });
             });
@@ -121,9 +117,8 @@ describe('Async', function () {
 
                 Common.noop = function (error) {
 
-                    expect(error).to.not.exist;
                     Common.noop = noop;
-
+                    expect(error).to.not.exist;
                     done();
                 };
 
@@ -151,7 +146,6 @@ describe('Async', function () {
 
                     expect(error).to.exist;
                     expect(error.message).to.equal('async error');
-
                     done();
                 });
             });
@@ -177,5 +171,36 @@ describe('Async', function () {
         //    va
         //});
 
+    });
+
+    describe('Flow', function () {
+
+    });
+
+    describe('Util', function () {
+
+    });
+
+    describe('Common', function () {
+
+        describe('#onlyOnce', function () {
+
+            it('does not throw if function is called once', function (done) {
+
+                var fn = Common.onlyOnce(Common.noop);
+
+                expect(fn).to.not.throw(Error);
+                done();
+            });
+
+            it('throws an error if function is called more than once', function (done) {
+
+                var fn = Common.onlyOnce(Common.noop);
+
+                fn();
+                expect(fn).to.throw('Callback was already called.');
+                done();
+            });
+        });
     });
 });
