@@ -923,29 +923,34 @@ __Example__
 // Part of an app, that fetches cats of the logged user.
 // This example uses `seq` function to avoid overnesting and error 
 // handling clutter.
-app.get('/cats', function(request, response) {
-  function handleError(err, data, callback) {
-    if (err) {
-      console.error(err);
-      response.json({ status: 'error', message: err.message });
+app.get('/cats', function (request, response) {
+
+    function handleError(err, data, callback) {
+
+        if (err) {
+            console.error(err);
+            response.json({ status: 'error', message: err.message });
+        }
+        else {
+            callback(data);
+        }
     }
-    else {
-      callback(data);
-    }
-  }
-  var User = request.models.User;
-  async.seq(
-    _.bind(User.get, User),  // 'User.get' has signature (id, callback(err, data))
-    handleError,
-    function(user, fn) {
-      user.getCats(fn);      // 'getCats' has signature (callback(err, data))
-    },
-    handleError,
-    function(cats) {
-      response.json({ status: 'ok', message: 'Cats found', data: cats });
-    }
-  )(req.session.user_id);
-  }
+
+    var User = request.models.User;
+
+    Nasync.seq(
+        _.bind(User.get, User),  // 'User.get' has signature (id, callback(err, data))
+        handleError,
+        function (user, fn) {
+
+            user.getCats(fn);    // 'getCats' has signature (callback(err, data))
+        },
+        handleError,
+        function (cats) {
+
+            response.json({ status: 'ok', message: 'Cats found', data: cats });
+        }
+    )(req.session.user_id);
 });
 ```
 
@@ -1486,7 +1491,7 @@ by `memoize`.
 __Arguments__
 
 * `fn` - The function to proxy and cache results from.
-* `hasher` - Tn optional function for generating a custom hash for storing
+* `hasher` - An optional function for generating a custom hash for storing
   results. It has all the arguments applied to it apart from the callback, and
   must be synchronous.
 
