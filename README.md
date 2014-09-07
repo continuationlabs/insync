@@ -1,8 +1,8 @@
 # nasync
 
-Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async is the goal for version 1.0.0.
-
 [![Build Status via Travis CI](https://travis-ci.org/cjihrig/nasync.svg?branch=master)](https://travis-ci.org/cjihrig/nasync)
+
+Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async is the goal for version 1.0.0.
 
 nasync is a utility module which provides straight-forward, powerful functions for working with asynchronous JavaScript. Unlike async, nasync is not intended to work in any environment other than Node.js. However, because nasync does not have any dependencies, it should be trivial to use with Browserify. Of course, you could use async too.
 
