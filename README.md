@@ -38,7 +38,7 @@ There are many more functions available so take a look at the docs below for a f
 
 ### Binding a context to an iterator
 
-This section is really about `bind`, not about nasync. If you are wondering how to make nasyncn execute your iterators in a given context, or are confused as to why a method of another library isn't working as an iterator, study this example:
+This section is really about `bind`, not about nasync. If you are wondering how to make nasync execute your iterators in a given context, or are confused as to why a method of another library isn't working as an iterator, study this example:
 
 ```javascript
 // Here is a simple object with an (unnecessarily roundabout) squaring method
@@ -77,7 +77,7 @@ Nasync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), fu
 
 The source is available for download from [GitHub](http://github.com/cjihrig/nasync). Alternatively, you can install using `npm`:
 
-    npm install async
+    npm install nasync
 
 ## Documentation
 
@@ -327,7 +327,7 @@ __Arguments__
 __Example__
 
 ```javascript
-async.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
+Nasync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
 
     // Results now equals an array of the existing files
 });
@@ -364,7 +364,7 @@ The same as [`reject`](#reject), only the `iterator` is applied to each item in 
 
 __Aliases:__ `inject`, `foldl`
 
-Reduces `arr` into a single value using an async `iterator` to return each successive step. `memo` is the initial state of the reduction. This function only operates in series.
+Reduces `arr` into a single value using an asynchronous `iterator` to return each successive step. `memo` is the initial state of the reduction. This function only operates in series.
 
 For performance reasons, it may make sense to split a call to this function into a parallel map, and then use the normal `Array.prototype.reduce` on the results. This function is for situations where each step in the reduction needs to be asynchronous; if you can get the data before reducing it, then it's probably a good idea to do so.
 
@@ -518,7 +518,7 @@ __Arguments__
   called with a boolean argument once it has completed.
 * `callback(result)` - A callback which is called as soon as any iterator returns
   `true`, or after all the iterator functions have finished. Result will be
-  either `true` or `false` depending on the values of the async tests.
+  either `true` or `false` depending on the values of the asynchronous tests.
 
 __Example__
 
@@ -546,7 +546,7 @@ __Arguments__
   called with a  boolean argument once it has completed.
 * `callback(result)` - A callback which is called after all the `iterator`
   functions have finished. Result will be either `true` or `false` depending on
-  the values of the async tests.
+  the values of the asynchronous tests.
 
 __Example__
 
@@ -617,36 +617,43 @@ __Arguments__
 __Example__
 
 ```javascript
-async.series([
-    function(callback){
-        // do some stuff ...
+Nasync.series([
+    function (callback) {
+
+        // Do some stuff ...
         callback(null, 'one');
     },
-    function(callback){
-        // do some more stuff ...
+    function (callback) {
+
+        // Do some more stuff ...
         callback(null, 'two');
     }
 ],
-// optional callback
-function(err, results){
+// Optional callback
+function (err, results) {
+
     // results is now equal to ['one', 'two']
 });
 
 
-// an example using an object instead of an array
-async.series({
-    one: function(callback){
-        setTimeout(function(){
+// An example using an object instead of an array
+Nasync.series({
+    one: function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 1);
         }, 200);
     },
-    two: function(callback){
-        setTimeout(function(){
+    two: function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 2);
         }, 100);
     }
-},
-function(err, results) {
+}, function (err, results) {
+
     // results is now equal to: {one: 1, two: 2}
 });
 ```
@@ -656,17 +663,10 @@ function(err, results) {
 <a name="parallel" />
 ### parallel(tasks, [callback])
 
-Run the `tasks` array of functions in parallel, without waiting until the previous
-function has completed. If any of the functions pass an error to its
-callback, the main `callback` is immediately called with the value of the error.
-Once the `tasks` have completed, the results are passed to the final `callback` as an
+Run the `tasks` array of functions in parallel, without waiting until the previous function has completed. If any of the functions pass an error to its callback, the main `callback` is immediately called with the value of the error. Once the `tasks` have completed, the results are passed to the final `callback` as an
 array.
 
-It is also possible to use an object instead of an array. Each property will be
-run as a function and the results will be passed to the final `callback` as an object
-instead of an array. This can be a more readable way of handling results from
-[`parallel`](#parallel).
-
+It is also possible to use an object instead of an array. Each property will be run as a function and the results will be passed to the final `callback` as an object instead of an array. This can be a more readable way of handling results from [`parallel`](#parallel).
 
 __Arguments__
 
@@ -680,39 +680,46 @@ __Arguments__
 __Example__
 
 ```javascript
-async.parallel([
-    function(callback){
-        setTimeout(function(){
+Nasync.parallel([
+    function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 'one');
         }, 200);
     },
-    function(callback){
-        setTimeout(function(){
+    function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 'two');
         }, 100);
     }
 ],
-// optional callback
-function(err, results){
-    // the results array will equal ['one','two'] even though
+// Optional callback
+function (err, results) {
+    // The results array will equal ['one','two'] even though
     // the second function had a shorter timeout.
 });
 
 
-// an example using an object instead of an array
-async.parallel({
-    one: function(callback){
-        setTimeout(function(){
+// An example using an object instead of an array
+Nasync.parallel({
+    one: function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 1);
         }, 200);
     },
-    two: function(callback){
-        setTimeout(function(){
+    two: function (callback) {
+
+        setTimeout(function () {
+
             callback(null, 2);
         }, 100);
     }
-},
-function(err, results) {
+}, function (err, results) {
     // results is now equals to: {one: 1, two: 2}
 });
 ```
@@ -722,11 +729,9 @@ function(err, results) {
 <a name="parallelLimit" />
 ### parallelLimit(tasks, limit, [callback])
 
-The same as [`parallel`](#parallel), only `tasks` are executed in parallel 
-with a maximum of `limit` tasks executing at any time.
+The same as [`parallel`](#parallel), only `tasks` are executed in parallel with a maximum of `limit` tasks executing at any time.
 
-Note that the `tasks` are not executed in batches, so there is no guarantee that 
-the first `limit` tasks will complete before any others are started.
+Note that the `tasks` are not executed in batches, so there is no guarantee that the first `limit` tasks will complete before any others are started.
 
 __Arguments__
 
@@ -743,12 +748,11 @@ __Arguments__
 <a name="whilst" />
 ### whilst(test, fn, callback)
 
-Repeatedly call `fn`, while `test` returns `true`. Calls `callback` when stopped,
-or an error occurs.
+Repeatedly call `fn`, while `test` returns `true`. Calls `callback` when stopped, or an error occurs.
 
 __Arguments__
 
-* `test()` - synchronous truth test to perform before each execution of `fn`.
+* `test()` - Synchronous truth test to perform before each execution of `fn`.
 * `fn(callback)` - A function which is called each time `test` passes. The function is
   passed a `callback(err)`, which must be called once it has completed with an 
   optional `err` argument.
@@ -760,7 +764,7 @@ __Example__
 ```javascript
 var count = 0;
 
-async.whilst(
+Nasync.whilst(
     function () { return count < 5; },
     function (callback) {
         count++;
@@ -777,8 +781,7 @@ async.whilst(
 <a name="doWhilst" />
 ### doWhilst(fn, test, callback)
 
-The post-check version of [`whilst`](#whilst). To reflect the difference in 
-the order of operations, the arguments `test` and `fn` are switched. 
+The post-check version of [`whilst`](#whilst). To reflect the difference in the order of operations, the arguments `test` and `fn` are switched. 
 
 `doWhilst` is to `whilst` as `do while` is to `while` in plain JavaScript.
 
@@ -787,8 +790,7 @@ the order of operations, the arguments `test` and `fn` are switched.
 <a name="until" />
 ### until(test, fn, callback)
 
-Repeatedly call `fn` until `test` returns `true`. Calls `callback` when stopped,
-or an error occurs.
+Repeatedly call `fn` until `test` returns `true`. Calls `callback` when stopped, or an error occurs.
 
 The inverse of [`whilst`](#whilst).
 
@@ -804,20 +806,18 @@ Like [`doWhilst`](#doWhilst), except the `test` is inverted. Note the argument o
 <a name="forever" />
 ### forever(fn, errback)
 
-Calls the asynchronous function `fn` with a callback parameter that allows it to
-call itself again, in series, indefinitely.
+Calls the asynchronous function `fn` with a callback parameter that allows it to call itself again, in series, indefinitely.
 
-If an error is passed to the callback then `errback` is called with the
-error, and execution stops, otherwise it will never be called.
+If an error is passed to the callback then `errback` is called with the error, and execution stops, otherwise it will never be called.
 
 ```javascript
-async.forever(
-    function(next) {
+Nasync.forever(
+    function (next) {
         // next is suitable for passing to things that need a callback(err [, whatever]);
-        // it will result in this function being called again.
+        // It will result in this function being called again.
     },
-    function(err) {
-        // if next is called with a value in its first parameter, it will appear
+    function (err) {
+        // If next is called with a value in its first parameter, it will appear
         // in here as 'err', and execution will stop.
     }
 );
@@ -828,10 +828,7 @@ async.forever(
 <a name="waterfall" />
 ### waterfall(tasks, [callback])
 
-Runs the `tasks` array of functions in series, each passing their results to the next in
-the array. However, if any of the `tasks` pass an error to their own callback, the
-next function is not executed, and the main `callback` is immediately called with
-the error.
+Runs the `tasks` array of functions in series, each passing their results to the next in the array. However, if any of the `tasks` pass an error to their own callback, the next function is not executed, and the main `callback` is immediately called with the error.
 
 __Arguments__
 
@@ -842,24 +839,26 @@ __Arguments__
 * `callback(err, [results])` - An optional callback to run once all the functions
   have completed. This will be passed the results of the last task's callback.
 
-
-
 __Example__
 
 ```javascript
-async.waterfall([
-    function(callback){
+Nasync.waterfall([
+    function (callback) {
+
         callback(null, 'one', 'two');
     },
-    function(arg1, arg2, callback){
-      // arg1 now equals 'one' and arg2 now equals 'two'
+    function (arg1, arg2, callback) {
+
+        // arg1 now equals 'one' and arg2 now equals 'two'
         callback(null, 'three');
     },
-    function(arg1, callback){
+    function (arg1, callback) {
+
         // arg1 now equals 'three'
         callback(null, 'done');
     }
 ], function (err, result) {
+
    // result now equals 'done'    
 });
 ```
@@ -868,10 +867,7 @@ async.waterfall([
 <a name="compose" />
 ### compose(fn1, fn2...)
 
-Creates a function which is a composition of the passed asynchronous
-functions. Each function consumes the return value of the function that
-follows. Composing functions `f()`, `g()`, and `h()` would produce the result of
-`f(g(h()))`, only this version uses callbacks to obtain the return values.
+Creates a function which is a composition of the passed asynchronous functions. Each function consumes the return value of the function that follows. Composing functions `f()`, `g()`, and `h()` would produce the result of `f(g(h()))`, only this version uses callbacks to obtain the return values.
 
 Each function is executed with the `this` binding of the composed function.
 
@@ -879,25 +875,29 @@ __Arguments__
 
 * `functions...` - the asynchronous functions to compose
 
-
 __Example__
 
 ```javascript
 function add1(n, callback) {
+
     setTimeout(function () {
+
         callback(null, n + 1);
     }, 10);
 }
 
 function mul3(n, callback) {
+
     setTimeout(function () {
+
         callback(null, n * 3);
     }, 10);
 }
 
-var add1mul3 = async.compose(mul3, add1);
+var add1mul3 = Nasync.compose(mul3, add1);
 
 add1mul3(4, function (err, result) {
+
    // result now equals 15
 });
 ```
@@ -906,8 +906,7 @@ add1mul3(4, function (err, result) {
 <a name="seq" />
 ### seq(fn1, fn2...)
 
-Version of the compose function that is more natural to read.
-Each following function consumes the return value of the latter function. 
+Version of the compose function that is more natural to read. Each following function consumes the return value of the latter function. 
 
 Each function is executed with the `this` binding of the composed function.
 
@@ -958,10 +957,7 @@ app.get('/cats', function (request, response) {
 <a name="applyEach" />
 ### applyEach(fns, args..., callback)
 
-Applies the provided arguments to each function in the array, calling 
-`callback` after all functions have completed. If you only provide the first
-argument, then it will return a function which lets you pass in the
-arguments as if it were a single function call.
+Applies the provided arguments to each function in the array, calling `callback` after all functions have completed. If you only provide the first argument, then it will return a function which lets you pass in the arguments as if it were a single function call.
 
 __Arguments__
 
@@ -970,16 +966,15 @@ __Arguments__
 * `callback` - the final argument should be the callback, called when all
   functions have completed processing
 
-
 __Example__
 
 ```javascript
-async.applyEach([enableSearch, updateSchema], 'bucket', callback);
+Nasync.applyEach([enableSearch, updateSchema], 'bucket', callback);
 
 // partial application example:
-async.each(
+Nasync.each(
     buckets,
-    async.applyEach([enableSearch, updateSchema]),
+    Nasync.applyEach([enableSearch, updateSchema]),
     callback
 );
 ```
@@ -996,10 +991,7 @@ The same as [`applyEach`](#applyEach) only the functions are applied in series.
 <a name="queue" />
 ### queue(worker, concurrency)
 
-Creates a `queue` object with the specified `concurrency`. Tasks added to the
-`queue` are processed in parallel (up to the `concurrency` limit). If all
-`worker`s are in progress, the task is queued until one becomes available. 
-Once a `worker` completes a `task`, that `task`'s callback is called.
+Creates a `queue` object with the specified `concurrency`. Tasks added to the `queue` are processed in parallel (up to the `concurrency` limit). If all `worker`s are in progress, the task is queued until one becomes available. Once a `worker` completes a `task`, that `task`'s callback is called.
 
 __Arguments__
 
@@ -1037,41 +1029,50 @@ methods:
 __Example__
 
 ```javascript
-// create a queue object with concurrency 2
+// Create a queue object with concurrency 2
 
-var q = async.queue(function (task, callback) {
+var q = Nasync.queue(function (task, callback) {
+
     console.log('hello ' + task.name);
     callback();
 }, 2);
 
 
-// assign a callback
-q.drain = function() {
+// Assign a callback
+q.drain = function () {
+
     console.log('all items have been processed');
 }
 
-// add some items to the queue
+// Add some items to the queue
 
-q.push({name: 'foo'}, function (err) {
+q.push({ name: 'foo' }, function (err) {
+
     console.log('finished processing foo');
 });
-q.push({name: 'bar'}, function (err) {
+q.push({ name: 'bar' }, function (err) {
+
     console.log('finished processing bar');
 });
 
-// add some items to the queue (batch-wise)
+// Add some items to the queue (batch-wise)
 
-q.push([{name: 'baz'},{name: 'bay'},{name: 'bax'}], function (err) {
+q.push([
+    { name: 'baz' },
+    { name: 'bay' },
+    { name: 'bax' }
+], function (err) {
+
     console.log('finished processing bar');
 });
 
-// add some items to the front of the queue
+// Add some items to the front of the queue
 
-q.unshift({name: 'bar'}, function (err) {
+q.unshift({ name: 'bar' }, function (err) {
+
     console.log('finished processing bar');
 });
 ```
-
 
 ---------------------------------------
 
@@ -1089,15 +1090,11 @@ The same as [`queue`](#queue) only tasks are assigned a priority and completed i
 <a name="cargo" />
 ### cargo(worker, [payload])
 
-Creates a `cargo` object with the specified payload. Tasks added to the
-cargo will be processed altogether (up to the `payload` limit). If the
-`worker` is in progress, the task is queued until it becomes available. Once
-the `worker` has completed some tasks, each callback of those tasks is called.
+Creates a `cargo` object with the specified payload. Tasks added to the cargo will be processed altogether (up to the `payload` limit). If the `worker` is in progress, the task is queued until it becomes available. Once the `worker` has completed some tasks, each callback of those tasks is called.
+
 Check out [this animation](https://camo.githubusercontent.com/6bbd36f4cf5b35a0f11a96dcd2e97711ffc2fb37/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f313637363837312f36383130382f62626330636662302d356632392d313165322d393734662d3333393763363464633835382e676966) for how `cargo` and `queue` work.
 
-While [queue](#queue) passes only one task to one of a group of workers
-at a time, cargo passes an array of tasks to a single worker, repeating
-when the worker is finished.
+While [queue](#queue) passes only one task to one of a group of workers at a time, cargo passes an array of tasks to a single worker, repeating when the worker is finished.
 
 __Arguments__
 
@@ -1109,8 +1106,7 @@ __Arguments__
 
 __Cargo objects__
 
-The `cargo` object returned by this function has the following properties and
-methods:
+The `cargo` object returned by this function has the following properties and methods:
 
 * `length()` - A function returning the number of items waiting to be processed.
 * `payload` - An `integer` for determining how many tasks should be
@@ -1126,25 +1122,29 @@ methods:
 __Example__
 
 ```javascript
-// create a cargo object with payload 2
+// Create a cargo object with payload 2
 
-var cargo = async.cargo(function (tasks, callback) {
-    for(var i=0; i<tasks.length; i++){
-      console.log('hello ' + tasks[i].name);
+var cargo = Nasync.cargo(function (tasks, callback) {
+
+    for (var i=0, il = tasks.length; i < il; ++i) {
+        console.log('hello ' + tasks[i].name);
     }
+
     callback();
 }, 2);
 
+// Add some items
 
-// add some items
+cargo.push({ name: 'foo' }, function (err) {
 
-cargo.push({name: 'foo'}, function (err) {
     console.log('finished processing foo');
 });
-cargo.push({name: 'bar'}, function (err) {
+cargo.push({ name: 'bar' }, function (err) {
+
     console.log('finished processing bar');
 });
-cargo.push({name: 'baz'}, function (err) {
+cargo.push({ name: 'baz' }, function (err) {
+
     console.log('finished processing baz');
 });
 ```
@@ -1154,42 +1154,34 @@ cargo.push({name: 'baz'}, function (err) {
 <a name="auto" />
 ### auto(tasks, [callback])
 
-Determines the best order for running the functions in `tasks`, based on their 
-requirements. Each function can optionally depend on other functions being completed 
-first, and each function is run as soon as its requirements are satisfied. 
+Determines the best order for running the functions in `tasks`, based on their requirements. Each function can optionally depend on other functions being completed first, and each function is run as soon as its requirements are satisfied.
 
-If any of the functions pass an error to their callback, it will not 
-complete (so any other functions depending on it will not run), and the main 
-`callback` is immediately called with the error. Functions also receive an 
-object containing the results of functions which have completed so far.
+If any of the functions pass an error to their callback, it will not complete (so any other functions depending on it will not run), and the main `callback` is immediately called with the error. Functions also receive an object containing the results of functions which have completed so far.
 
-Note, all functions are called with a `results` object as a second argument, 
-so it is unsafe to pass functions in the `tasks` object which cannot handle the
-extra argument. 
+Note, all functions are called with a `results` object as a second argument, so it is unsafe to pass functions in the `tasks` object which cannot handle the extra argument. 
 
 For example, this snippet of code:
 
 ```javascript
-async.auto({
-  readData: async.apply(fs.readFile, 'data.txt', 'utf-8')
+Nasync.auto({
+    readData: Nasync.apply(fs.readFile, 'data.txt', 'utf-8')
 }, callback);
 ```
 
-will have the effect of calling `readFile` with the results object as the last
-argument, which will fail:
+will have the effect of calling `readFile` with the results object as the last argument, which will fail:
 
 ```javascript
 fs.readFile('data.txt', 'utf-8', cb, {});
 ```
 
-Instead, wrap the call to `readFile` in a function which does not forward the 
-`results` object:
+Instead, wrap the call to `readFile` in a function which does not forward the `results` object:
 
 ```javascript
-async.auto({
-  readData: function(cb, results){
-    fs.readFile('data.txt', 'utf-8', cb);
-  }
+Nasync.auto({
+    readData: function (cb, results) {
+
+        fs.readFile('data.txt', 'utf-8', cb);
+    }
 }, callback);
 ```
 
@@ -1209,88 +1201,90 @@ __Arguments__
   an error occurs, no further `tasks` will be performed, and the results
   object will only contain partial results.
 
-
 __Example__
 
 ```javascript
-async.auto({
-    get_data: function(callback){
+Nasync.auto({
+    get_data: function (callback) {
+
         console.log('in get_data');
-        // async code to get some data
+        // Asynchronous code to get some data
         callback(null, 'data', 'converted to array');
     },
-    make_folder: function(callback){
+    make_folder: function (callback) {
+
         console.log('in make_folder');
-        // async code to create a directory to store a file in
+        // Asynchronous code to create a directory to store a file in
         // this is run at the same time as getting the data
         callback(null, 'folder');
     },
-    write_file: ['get_data', 'make_folder', function(callback, results){
+    write_file: ['get_data', 'make_folder', function (callback, results) {
+
         console.log('in write_file', JSON.stringify(results));
-        // once there is some data and the directory exists,
+        // Once there is some data and the directory exists,
         // write the data to a file in the directory
         callback(null, 'filename');
     }],
-    email_link: ['write_file', function(callback, results){
+    email_link: ['write_file', function (callback, results) {
+
         console.log('in email_link', JSON.stringify(results));
-        // once the file is written let's email a link to it...
+        // Once the file is written let's email a link to it...
         // results.write_file contains the filename returned by write_file.
         callback(null, {'file':results.write_file, 'email':'user@example.com'});
     }]
-}, function(err, results) {
+}, function (err, results) {
+
     console.log('err = ', err);
     console.log('results = ', results);
 });
 ```
 
-This is a fairly trivial example, but to do this using the basic parallel and
-series functions would look like this:
+This is a fairly trivial example, but to do this using the basic parallel and series functions would look like this:
 
 ```javascript
-async.parallel([
-    function(callback){
+Nasync.parallel([
+    function (callback) {
+
         console.log('in get_data');
-        // async code to get some data
+        // Asynchronous code to get some data
         callback(null, 'data', 'converted to array');
     },
-    function(callback){
+    function (callback) {
+
         console.log('in make_folder');
-        // async code to create a directory to store a file in
+        // Asynchronous code to create a directory to store a file in
         // this is run at the same time as getting the data
         callback(null, 'folder');
     }
 ],
-function(err, results){
-    async.series([
-        function(callback){
+function (err, results) {
+    Nasync.series([
+        function (callback) {
+
             console.log('in write_file', JSON.stringify(results));
-            // once there is some data and the directory exists,
+            // Once there is some data and the directory exists,
             // write the data to a file in the directory
             results.push('filename');
             callback(null);
         },
-        function(callback){
+        function (callback) {
+
             console.log('in email_link', JSON.stringify(results));
-            // once the file is written let's email a link to it...
-            callback(null, {'file':results.pop(), 'email':'user@example.com'});
+            // Once the file is written let's email a link to it...
+            callback(null, { file: results.pop(), email: 'user@example.com' });
         }
     ]);
 });
 ```
 
-For a complicated series of `async` tasks, using the [`auto`](#auto) function makes adding
-new tasks much easier (and the code more readable).
-
+For a complicated series of asynchronous tasks, using the [`auto`](#auto) function makes adding new tasks much easier (and the code more readable).
 
 ---------------------------------------
 
 <a name="retry" />
 ### retry([times = 5], task, [callback])
 
-Attempts to get a successful response from `task` no more than `times` times before
-returning an error. If the task is successful, the `callback` will be passed the result
-of the successfull task. If all attemps fail, the callback will be passed the error and
-result (if any) of the final attempt.
+Attempts to get a successful response from `task` no more than `times` times before returning an error. If the task is successful, the `callback` will be passed the result of the successfull task. If all attemps fail, the callback will be passed the error and result (if any) of the final attempt.
 
 __Arguments__
 
@@ -1302,39 +1296,35 @@ __Arguments__
 * `callback(err, results)` - An optional callback which is called when the
   task has succeeded, or after the final failed attempt. It receives the `err` and `result` arguments of the last attempt at completing the `task`.
 
-The [`retry`](#retry) function can be used as a stand-alone control flow by passing a
-callback, as shown below:
+The [`retry`](#retry) function can be used as a stand-alone control flow by passing a callback, as shown below:
 
 ```javascript
-async.retry(3, apiMethod, function(err, result) {
-    // do something with the result
+Nasync.retry(3, apiMethod, function (err, result) {
+
+    // Do something with the result
 });
 ```
 
-It can also be embeded within other control flow functions to retry individual methods
-that are not as reliable, like this:
+It can also be embeded within other control flow functions to retry individual methods that are not as reliable, like this:
 
 ```javascript
-async.auto({
+Nasync.auto({
     users: api.getUsers.bind(api),
-    payments: async.retry(3, api.getPayments.bind(api))
-}, function(err, results) {
-  // do something with the results
+    payments: Nasync.retry(3, api.getPayments.bind(api))
+}, function (err, results) {
+
+    // Do something with the results
 });
 ```
-
 
 ---------------------------------------
 
 <a name="iterator" />
 ### iterator(tasks)
 
-Creates an iterator function which calls the next function in the `tasks` array,
-returning a continuation to call the next one after that. It's also possible to
-“peek” at the next iterator with `iterator.next()`.
+Creates an iterator function which calls the next function in the `tasks` array, returning a continuation to call the next one after that. It's also possible to "peek" at the next iterator with `iterator.next()`.
 
-This function is used internally by the `async` module, but can be useful when
-you want to manually control the flow of functions in series.
+This function is used internally by the nasync module, but can be useful when you want to manually control the flow of functions in series.
 
 __Arguments__
 
@@ -1343,10 +1333,10 @@ __Arguments__
 __Example__
 
 ```javascript
-var iterator = async.iterator([
-    function(){ sys.p('one'); },
-    function(){ sys.p('two'); },
-    function(){ sys.p('three'); }
+var iterator = Nasync.iterator([
+    function () { sys.p('one'); },
+    function () { sys.p('two'); },
+    function () { sys.p('three'); }
 ]);
 
 node> var iterator2 = iterator();
@@ -1367,9 +1357,7 @@ node> nextfn();
 
 Creates a continuation function with some arguments already applied. 
 
-Useful as a shorthand when combined with other control flow functions. Any arguments
-passed to the returned function are added to the arguments originally passed
-to apply.
+Useful as a shorthand when combined with other control flow functions. Any arguments passed to the returned function are added to the arguments originally passed to apply.
 
 __Arguments__
 
@@ -1380,31 +1368,32 @@ __Arguments__
 __Example__
 
 ```javascript
-// using apply
+// Using apply
 
-async.parallel([
-    async.apply(fs.writeFile, 'testfile1', 'test1'),
-    async.apply(fs.writeFile, 'testfile2', 'test2'),
+Nasync.parallel([
+    Nasync.apply(fs.writeFile, 'testfile1', 'test1'),
+    Nasync.apply(fs.writeFile, 'testfile2', 'test2'),
 ]);
 
 
-// the same process without using apply
+// The same process without using apply
 
-async.parallel([
-    function(callback){
+Nasync.parallel([
+    function (callback) {
+
         fs.writeFile('testfile1', 'test1', callback);
     },
-    function(callback){
+    function (callback) {
+
         fs.writeFile('testfile2', 'test2', callback);
     }
 ]);
 ```
 
-It's possible to pass any number of additional arguments when calling the
-continuation:
+It's possible to pass any number of additional arguments when calling the continuation:
 
 ```javascript
-node> var fn = async.apply(sys.puts, 'one');
+node> var fn = Nasync.apply(sys.puts, 'one');
 node> fn('two', 'three');
 one
 two
@@ -1416,12 +1405,7 @@ three
 <a name="nextTick" />
 ### nextTick(callback)
 
-Calls `callback` on a later loop around the event loop. In Node.js this just
-calls `process.nextTick`; in the browser it falls back to `setImmediate(callback)`
-if available, otherwise `setTimeout(callback, 0)`, which means other higher priority
-events may precede the execution of `callback`.
-
-This is used internally for browser-compatibility purposes.
+Calls `callback` on a later loop around the event loop. This just calls `process.nextTick`.
 
 __Arguments__
 
@@ -1431,18 +1415,20 @@ __Example__
 
 ```javascript
 var call_order = [];
-async.nextTick(function(){
+
+Nasync.nextTick(function () {
+
     call_order.push('two');
     // call_order now equals ['one','two']
 });
+
 call_order.push('one')
 ```
 
 <a name="times" />
 ### times(n, callback)
 
-Calls the `callback` function `n` times, and accumulates results in the same manner
-you would use with [`map`](#map).
+Calls the `callback` function `n` times, and accumulates results in the same manner you would use with [`map`](#map).
 
 __Arguments__
 
@@ -1452,41 +1438,40 @@ __Arguments__
 __Example__
 
 ```javascript
-// Pretend this is some complicated async factory
-var createUser = function(id, callback) {
+// Pretend this is some complicated asynchronous factory
+var createUser = function (id, callback) {
+
   callback(null, {
     id: 'user' + id
-  })
-}
-// generate 5 users
-async.times(5, function(n, next){
-    createUser(n, function(err, user) {
-      next(err, user)
-    })
-}, function(err, users) {
-  // we should now have 5 users
+  });
+};
+
+// Generate 5 users
+Nasync.times(5, function (n, next) {
+
+    createUser(n, function (err, user) {
+
+      next(err, user);
+    });
+}, function (err, users) {
+
+  // We should now have 5 users
 });
 ```
 
 <a name="timesSeries" />
 ### timesSeries(n, callback)
 
-The same as [`times`](#times), only the iterator is applied to each item in `arr` in
-series. The next `iterator` is only called once the current one has completed. 
-The results array will be in the same order as the original.
-
+The same as [`times`](#times), only the iterator is applied to each item in `arr` in series. The next `iterator` is only called once the current one has completed. The results array will be in the same order as the original.
 
 ## Utils
 
 <a name="memoize" />
 ### memoize(fn, [hasher])
 
-Caches the results of an `async` function. When creating a hash to store function
-results against, the callback is omitted from the hash and an optional hash
-function can be used.
+Caches the results of an asynchronous function. When creating a hash to store function results against, the callback is omitted from the hash and an optional hash function can be used.
 
-The cache of results is exposed as the `memo` property of the function returned
-by `memoize`.
+The cache of results is exposed as the `memo` property of the function returned by `memoize`.
 
 __Arguments__
 
@@ -1499,22 +1484,23 @@ __Example__
 
 ```javascript
 var slow_fn = function (name, callback) {
-    // do something
+
+    // Do something
     callback(null, result);
 };
-var fn = async.memoize(slow_fn);
+var fn = Nasync.memoize(slow_fn);
 
 // fn can now be used as if it were slow_fn
 fn('some name', function () {
-    // callback
+
+    // Callback
 });
 ```
 
 <a name="unmemoize" />
 ### unmemoize(fn)
 
-Undoes a [`memoize`](#memoize)d function, reverting it to the original, unmemoized
-form. Handy for testing.
+Undoes a [`memoize`](#memoize)d function, reverting it to the original, unmemoized form. Handy for testing.
 
 __Arguments__
 
@@ -1523,10 +1509,7 @@ __Arguments__
 <a name="log" />
 ### log(function, arguments)
 
-Logs the result of an `async` function to the `console`. Only works in Node.js or
-in browsers that support `console.log` and `console.error` (such as FF and Chrome).
-If multiple arguments are returned from the async function, `console.log` is
-called on each argument in order.
+Logs the result of an asynchronous function to the `console`. If multiple arguments are returned from the asynchronous function, `console.log` is called on each argument in order.
 
 __Arguments__
 
@@ -1536,14 +1519,17 @@ __Arguments__
 __Example__
 
 ```javascript
-var hello = function(name, callback){
-    setTimeout(function(){
+var hello = function (name, callback) {
+
+    setTimeout(function () {
+
         callback(null, 'hello ' + name);
     }, 1000);
 };
 ```
+
 ```javascript
-node> async.log(hello, 'world');
+node> Nasync.log(hello, 'world');
 'hello world'
 ```
 
@@ -1552,11 +1538,7 @@ node> async.log(hello, 'world');
 <a name="dir" />
 ### dir(function, arguments)
 
-Logs the result of an `async` function to the `console` using `console.dir` to
-display the properties of the resulting object. Only works in Node.js or
-in browsers that support `console.dir` and `console.error` (such as FF and Chrome).
-If multiple arguments are returned from the async function, `console.dir` is
-called on each argument in order.
+Logs the result of an asynchronous function to the `console` using `console.dir` to display the properties of the resulting object. If multiple arguments are returned from the asynchronous function, `console.dir` is called on each argument in order.
 
 __Arguments__
 
@@ -1566,14 +1548,17 @@ __Arguments__
 __Example__
 
 ```javascript
-var hello = function(name, callback){
-    setTimeout(function(){
-        callback(null, {hello: name});
+var hello = function (name, callback) {
+
+    setTimeout(function () {
+
+        callback(null, { hello: name });
     }, 1000);
 };
 ```
+
 ```javascript
-node> async.dir(hello, 'world');
+node> Nasync.dir(hello, 'world');
 {hello: 'world'}
 ```
 
