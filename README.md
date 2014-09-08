@@ -22,13 +22,13 @@ Nasync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
 });
 
 Nasync.parallel([
-    function() { ... },
-    function() { ... }
+    function () { ... },
+    function () { ... }
 ], callback);
 
 Nasync.series([
-    function() { ... },
-    function() { ... }
+    function () { ... },
+    function () { ... }
 ]);
 ```
 
@@ -48,14 +48,14 @@ var AsyncSquaringLibrary = {
 
         var result = Math.pow(number, this.squareExponent);
 
-        setTimeout(function() {
+        setTimeout(function () {
 
             callback(null, result);
         }, 200);
     }
 };
 
-Nasync.map([1, 2, 3], AsyncSquaringLibrary.square, function(err, result) {
+Nasync.map([1, 2, 3], AsyncSquaringLibrary.square, function (err, result) {
 
   // result is [NaN, NaN, NaN]
   // This fails because the `this.squareExponent` expression in the square
@@ -172,7 +172,7 @@ Nasync.each(openFiles, saveFile, function (err) {
 ```javascript
 // assuming openFiles is an array of file names 
 
-Nasync.each(openFiles, function(file, callback) {
+Nasync.each(openFiles, function (file, callback) {
 
     // Perform operation on file here.
     console.log('Processing file ' + file);
@@ -391,7 +391,7 @@ Nasync.reduce([1, 2, 3], 0, function (memo, item, callback) {
 
         callback(null, memo + item);
     });
-}, function(err, result) {
+}, function (err, result) {
 
     // Result is now equal to the last value of memo, which is 6
 });

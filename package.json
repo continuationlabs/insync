@@ -22,7 +22,7 @@
     "lab": "4.x.x"
   },
   "scripts": {
-    "test": "node node_modules/lab/bin/lab -v -t 50"
+    "test": "node node_modules/lab/bin/lab -v -t 55"
   },
   "keywords": [
     "async",
