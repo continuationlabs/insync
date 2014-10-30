@@ -14,10 +14,36 @@ internals.eachAsync = function (result) {
 
     return function (item, callback) {
 
-        setTimeout(function() {
+        setTimeout(function () {
 
             result.push(item);
             callback(null);
+        }, item * 100);
+    };
+};
+
+internals.mapAsync = function (result) {
+
+    return function (item, callback) {
+
+        setTimeout(function () {
+
+            var dbl = item + item;
+            result.push(dbl);
+            callback(null, dbl);
+        }, item * 100);
+    };
+};
+
+internals.filterAsync = function (callOrder) {
+
+    return function (item, callback) {
+
+        callOrder.push(item);
+
+        setTimeout(function () {
+
+            callback(item > 1);
         }, item * 100);
     };
 };
@@ -96,6 +122,12 @@ describe('Nasync', function () {
                     done();
                 });
             });
+
+            it('is aliased as forEach()', function (done) {
+
+                expect(Nasync.each).to.equal(Nasync.forEach);
+                done();
+            });
         });
 
         describe('#eachSeries', function () {
@@ -150,28 +182,271 @@ describe('Nasync', function () {
                     done();
                 });
             });
+
+            it('is aliased as forEachSeries()', function (done) {
+
+                expect(Nasync.eachSeries).to.equal(Nasync.forEachSeries);
+                done();
+            });
         });
 
+        describe('#eachLimit', function () {
 
+            it('iterates over a collection with a limit', function (done) {
 
+                var arr = [0, 1, 2, 3];
+                var result = [];
 
-        //it('`eachLimit` is the same as each, only with a limited number of iterators running', function (done) {
-        //
-        //    var result = [];
-        //
-        //    Nsync.eachLimit([1,9,2,8,3,7,4,6,5], 4, internals.eachAsync(result), function (error) {
-        //
-        //        expect(error).to.not.exist();
-        //        expect(result).to.deep.equal([1, 2, 3, 8, 4, 9, 7, 5, 6]);
-        //        done();
-        //    });
-        //});
-        //
-        //it('`map` products a new array of values by running them through an async function', function (done) {
-        //
-        //    va
-        //});
+                Nasync.eachLimit(arr, 2, internals.eachAsync(result), function (err) {
 
+                    expect(err).to.not.exist();
+                    expect(result).to.deep.equal(arr);
+                    done();
+                });
+            });
+
+            it('does not call iterator if array is empty', function (done) {
+
+                Nasync.eachLimit([], 2, function (item, callback) {
+
+                    expect(true).to.equal(false);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('does not call iterator if limit is zero', function (done) {
+
+                Nasync.eachLimit([1, 2, 3], 0, function (item, callback) {
+
+                    expect(true).to.equal(false);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('properly passes error to final callback', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.eachLimit(arr, 2, function (item, callback) {
+
+                    result.push(item);
+
+                    if (item === 2) {
+                        return callback(new Error('foo'));
+                    }
+
+                    callback();
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(result).to.deep.equal([0, 1, 2]);
+                    done();
+                });
+            });
+
+            it('is aliased as forEachLimit()', function (done) {
+
+                expect(Nasync.eachLimit).to.equal(Nasync.forEachLimit);
+                done();
+            });
+        });
+
+        describe('#map', function () {
+
+            it('creates a mapped version of input', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.map(arr, internals.mapAsync(result), function (err, mapped) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(mapped).to.deep.equal(result);
+                    done();
+                });
+            });
+
+            it('works without final callback', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.map(arr, function (item, callback) {
+
+                    result.push(item);
+
+                    if (result.length === arr.length) {
+                        expect(arr).to.deep.equal(result);
+                        done();
+                    }
+
+                    callback(null, item);
+                });
+            });
+
+            it('properly passes error to final callback', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.map(arr, function (item, callback) {
+
+                    result.push(item);
+
+                    if (item === 2) {
+                        return callback(new Error('foo'));
+                    }
+
+                    callback();
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(result).to.deep.equal([0, 1, 2]);
+                    done();
+                });
+            });
+        });
+
+        describe('#mapSeries', function () {
+
+            it('creates a mapped version of input', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.mapSeries(arr, internals.mapAsync(result), function (err, mapped) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(mapped).to.deep.equal(result);
+                    done();
+                });
+            });
+
+            it('properly passes error to final callback', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.mapSeries(arr, function (item, callback) {
+
+                    result.push(item);
+
+                    if (item === 2) {
+                        return callback(new Error('foo'));
+                    }
+
+                    callback();
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(result).to.deep.equal([0, 1, 2]);
+                    done();
+                });
+            });
+        });
+
+        describe('#mapLimit', function () {
+
+            it('iterates over a collection with a limit', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Nasync.mapLimit(arr, 2, internals.mapAsync(result), function (err, mapped) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.deep.equal(mapped);
+                    done();
+                });
+            });
+        });
+
+        describe('#filter', function () {
+
+            it('filters an array', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.filter(arr, internals.filterAsync(callOrder), function (results) {
+
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(results).to.deep.equal([2, 3]);
+                    done();
+                });
+            });
+
+            it('is aliased as select()', function (done) {
+
+                expect(Nasync.filter).to.equal(Nasync.select);
+                done();
+            });
+        });
+
+        describe('#filterSeries', function () {
+
+            it('filters an array in series', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.filterSeries(arr, internals.filterAsync(callOrder), function (results) {
+
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(callOrder).to.deep.equal(arr);
+                    expect(results).to.deep.equal([2, 3]);
+                    done();
+                });
+            });
+
+            it('is aliased as selectSeries()', function (done) {
+
+                expect(Nasync.filterSeries).to.equal(Nasync.selectSeries);
+                done();
+            });
+        });
+
+        describe('#reject', function () {
+
+            it('filters an array', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.reject(arr, internals.filterAsync(callOrder), function (results) {
+
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(results).to.deep.equal([0, 1]);
+                    done();
+                });
+            });
+        });
+
+        describe('#rejectSeries', function () {
+
+            it('filters an array in series', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.rejectSeries(arr, internals.filterAsync(callOrder), function (results) {
+
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(callOrder).to.deep.equal(arr);
+                    expect(results).to.deep.equal([0, 1]);
+                    done();
+                });
+            });
+        });
     });
 
     describe('Flow', function () {
