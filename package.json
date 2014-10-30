@@ -3,7 +3,7 @@
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "main": "index",
   "author": "Colin Ihrig <cjihrig@gmail.com> (http://www.cjihrig.com/)",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "homepage": "https://github.com/cjihrig/nasync",
   "repository": {
     "type": "git",
@@ -19,10 +19,11 @@
     }
   ],
   "devDependencies": {
-    "lab": "4.x.x"
+    "lab": "5.x.x",
+    "code": "1.x.x"
   },
   "scripts": {
-    "test": "node node_modules/lab/bin/lab -v -t 55"
+    "test": "node node_modules/lab/bin/lab -v -t 57"
   },
   "keywords": [
     "async",
