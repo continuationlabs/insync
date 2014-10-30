@@ -1,5 +1,6 @@
 // Load Modules
 
+var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Nasync = require('../lib');
@@ -37,7 +38,7 @@ var describe = lab.describe;
 var it = lab.it;
 var before = lab.before;
 var after = lab.after;
-var expect = Lab.expect;
+var expect = Code.expect;
 
 describe('Nasync', function () {
 
@@ -51,7 +52,7 @@ describe('Nasync', function () {
 
                 Nasync.each([4, 3, 2, 1], internals.eachAsync(result), function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     expect(result).to.deep.equal([1, 2, 3, 4]);
                     done();
                 });
@@ -64,7 +65,7 @@ describe('Nasync', function () {
                 Common.noop = function (error) {
 
                     Common.noop = noop;
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     done();
                 };
 
@@ -75,7 +76,7 @@ describe('Nasync', function () {
 
                 Nasync.each([], Common.noop, function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     done();
                 });
             });
@@ -90,7 +91,7 @@ describe('Nasync', function () {
                     });
                 }, function (error) {
 
-                    expect(error).to.exist;
+                    expect(error).to.exist();
                     expect(error.message).to.equal('async error');
                     done();
                 });
@@ -105,7 +106,7 @@ describe('Nasync', function () {
 
                 Nasync.eachSeries([1,3,2], internals.eachAsync(result), function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     expect(result).to.deep.equal([1, 3, 2]);
                     done();
                 });
@@ -118,7 +119,7 @@ describe('Nasync', function () {
                 Common.noop = function (error) {
 
                     Common.noop = noop;
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     done();
                 };
 
@@ -129,7 +130,7 @@ describe('Nasync', function () {
 
                 Nasync.eachSeries([], Common.noop, function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     done();
                 });
             });
@@ -144,7 +145,7 @@ describe('Nasync', function () {
                     });
                 }, function (error) {
 
-                    expect(error).to.exist;
+                    expect(error).to.exist();
                     expect(error.message).to.equal('async error');
                     done();
                 });
@@ -160,7 +161,7 @@ describe('Nasync', function () {
         //
         //    Nsync.eachLimit([1,9,2,8,3,7,4,6,5], 4, internals.eachAsync(result), function (error) {
         //
-        //        expect(error).to.not.exist;
+        //        expect(error).to.not.exist();
         //        expect(result).to.deep.equal([1, 2, 3, 8, 4, 9, 7, 5, 6]);
         //        done();
         //    });
@@ -277,12 +278,12 @@ describe('Nasync', function () {
                 memoized.memo.foo = [null, 'bar'];
                 memoized('foo', function (err, value) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(value).to.equal('bar');
                     memoized('baz', function (err, value) {
 
-                        expect(err).to.exist;
-                        expect(value).to.not.exist;
+                        expect(err).to.exist();
+                        expect(value).to.not.exist();
                         done();
                     });
                 });
@@ -504,7 +505,7 @@ describe('Nasync', function () {
 
                 var fn = Common.onlyOnce(Common.noop);
 
-                expect(fn).to.not.throw(Error);
+                expect(fn).to.not.throw();
                 done();
             });
 
