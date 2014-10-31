@@ -48,6 +48,19 @@ internals.filterAsync = function (callOrder) {
     };
 };
 
+internals.reduceAsync = function (callOrder) {
+
+    return function (memo, item, callback) {
+
+        callOrder.push(item);
+
+        setTimeout(function () {
+
+            callback(null, memo + item);
+        });
+    };
+};
+
 internals.doNothing = function () {
 
     var args = Array.prototype.slice.call(arguments);
@@ -445,6 +458,189 @@ describe('Nasync', function () {
                     expect(results).to.deep.equal([0, 1]);
                     done();
                 });
+            });
+        });
+
+        describe('#reduce', function () {
+
+            it('reduces an array', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.reduce(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal(6);
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(callOrder).to.deep.equal(arr);
+                    done();
+                });
+            });
+
+            it('is aliased as inject()', function (done) {
+
+                expect(Nasync.reduce).to.equal(Nasync.inject);
+                done();
+            });
+
+            it('is aliased as foldl()', function (done) {
+
+                expect(Nasync.reduce).to.equal(Nasync.foldl);
+                done();
+            });
+        });
+
+        describe('#reduceRight', function () {
+
+            it('reduces an array', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.reduceRight(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal(6);
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(callOrder).to.deep.equal([3, 2, 1, 0]);
+                    done();
+                });
+            });
+
+            it('is aliased as foldr()', function (done) {
+
+                expect(Nasync.reduceRight).to.equal(Nasync.foldr);
+                done();
+            });
+        });
+
+        describe('#detect', function () {
+
+            it('returns the first value that passes test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.detect(arr, function (item, callback) {
+
+                    callOrder.push(item);
+
+                    setTimeout(function () {
+
+                        callback(item === 2);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(2);
+                    done();
+                });
+            });
+
+            it('returns undefined when no items pass test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var callOrder = [];
+
+                Nasync.detect(arr, function (item, callback) {
+
+                    callOrder.push(item);
+
+                    setTimeout(function () {
+
+                        callback(item === 6);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(undefined);
+                    done();
+                });
+            });
+        });
+
+        describe('#some', function () {
+
+            it('returns true if at least one element satisfies test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.some(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(item === 2);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(true);
+                    done();
+                });
+            });
+
+            it('returns false if no elements satisfies test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.some(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(item === 6);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(false);
+                    done();
+                });
+            });
+
+            it('is aliased as any()', function (done) {
+
+                expect(Nasync.some).to.equal(Nasync.any);
+                done();
+            });
+        });
+
+        describe('#every', function () {
+
+            it('returns true if every element satisfies test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.every(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(item >= 0 && item < 4);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(true);
+                    done();
+                });
+            });
+
+            it('returns false if any element fails test', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.every(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(item >= 1);
+                    }, 100);
+                }, function (result) {
+
+                    expect(result).to.equal(false);
+                    done();
+                });
+            });
+
+            it('is aliased as all()', function (done) {
+
+                expect(Nasync.every).to.equal(Nasync.all);
+                done();
             });
         });
     });

@@ -1107,18 +1107,6 @@ exports['iterator.next'] = function(test){
     test.done();
 };
 
-exports['reduce'] = function(test){
-    var call_order = [];
-    async.reduce([1,2,3], 0, function(a, x, callback){
-        call_order.push(x);
-        callback(null, a + x);
-    }, function(err, result){
-        test.equals(result, 6);
-        test.same(call_order, [1,2,3]);
-        test.done();
-    });
-};
-
 exports['reduce async with non-reference memo'] = function(test){
     async.reduce([1,3,2], 0, function(a, x, callback){
         setTimeout(function(){callback(null, a + x)}, Math.random()*100);
@@ -1138,53 +1126,6 @@ exports['reduce error'] = function(test){
     setTimeout(test.done, 50);
 };
 
-exports['inject alias'] = function(test){
-    test.equals(async.inject, async.reduce);
-    test.done();
-};
-
-exports['foldl alias'] = function(test){
-    test.equals(async.foldl, async.reduce);
-    test.done();
-};
-
-exports['reduceRight'] = function(test){
-    var call_order = [];
-    var a = [1,2,3];
-    async.reduceRight(a, 0, function(a, x, callback){
-        call_order.push(x);
-        callback(null, a + x);
-    }, function(err, result){
-        test.equals(result, 6);
-        test.same(call_order, [3,2,1]);
-        test.same(a, [1,2,3]);
-        test.done();
-    });
-};
-
-exports['foldr alias'] = function(test){
-    test.equals(async.foldr, async.reduceRight);
-    test.done();
-};
-
-exports['some true'] = function(test){
-    async.some([3,1,2], function(x, callback){
-        setTimeout(function(){callback(x === 1);}, 0);
-    }, function(result){
-        test.equals(result, true);
-        test.done();
-    });
-};
-
-exports['some false'] = function(test){
-    async.some([3,1,2], function(x, callback){
-        setTimeout(function(){callback(x === 10);}, 0);
-    }, function(result){
-        test.equals(result, false);
-        test.done();
-    });
-};
-
 exports['some early return'] = function(test){
     var call_order = [];
     async.some([1,2,3], function(x, callback){
@@ -1199,29 +1140,6 @@ exports['some early return'] = function(test){
         test.same(call_order, [1,'callback',2,3]);
         test.done();
     }, 100);
-};
-
-exports['any alias'] = function(test){
-    test.equals(async.any, async.some);
-    test.done();
-};
-
-exports['every true'] = function(test){
-    async.every([1,2,3], function(x, callback){
-        setTimeout(function(){callback(true);}, 0);
-    }, function(result){
-        test.equals(result, true);
-        test.done();
-    });
-};
-
-exports['every false'] = function(test){
-    async.every([1,2,3], function(x, callback){
-        setTimeout(function(){callback(x % 2);}, 0);
-    }, function(result){
-        test.equals(result, false);
-        test.done();
-    });
 };
 
 exports['every early return'] = function(test){
@@ -1240,50 +1158,9 @@ exports['every early return'] = function(test){
     }, 100);
 };
 
-exports['all alias'] = function(test){
-    test.equals(async.all, async.every);
-    test.done();
-};
-
-exports['detect'] = function(test){
-    var call_order = [];
-    async.detect([3,2,1], detectIterator.bind(this, call_order), function(result){
-        call_order.push('callback');
-        test.equals(result, 2);
-    });
-    setTimeout(function(){
-        test.same(call_order, [1,2,'callback',3]);
-        test.done();
-    }, 100);
-};
-
-exports['detect - mulitple matches'] = function(test){
-    var call_order = [];
-    async.detect([3,2,2,1,2], detectIterator.bind(this, call_order), function(result){
-        call_order.push('callback');
-        test.equals(result, 2);
-    });
-    setTimeout(function(){
-        test.same(call_order, [1,2,'callback',2,2,3]);
-        test.done();
-    }, 100);
-};
-
 exports['detectSeries'] = function(test){
     var call_order = [];
     async.detectSeries([3,2,1], detectIterator.bind(this, call_order), function(result){
-        call_order.push('callback');
-        test.equals(result, 2);
-    });
-    setTimeout(function(){
-        test.same(call_order, [3,2,'callback']);
-        test.done();
-    }, 200);
-};
-
-exports['detectSeries - multiple matches'] = function(test){
-    var call_order = [];
-    async.detectSeries([3,2,2,1,2], detectIterator.bind(this, call_order), function(result){
         call_order.push('callback');
         test.equals(result, 2);
     });
