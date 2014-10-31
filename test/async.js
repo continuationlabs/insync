@@ -264,6 +264,20 @@ describe('Nasync', function () {
                 });
             });
 
+            it('provides a default callback if one is not provided', function (done) {
+
+                var noop = Common.noop;
+
+                Common.noop = function (error) {
+
+                    Common.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Nasync.eachLimit([1, 2, 3, 4], 2, internals.doNothing);
+            });
+
             it('is aliased as forEachLimit()', function (done) {
 
                 expect(Nasync.eachLimit).to.equal(Nasync.forEachLimit);
@@ -641,6 +655,115 @@ describe('Nasync', function () {
 
                 expect(Nasync.every).to.equal(Nasync.all);
                 done();
+            });
+        });
+
+        describe('#concat', function () {
+
+            it('concatenates results', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.concat(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(null, [item, item]);
+                    }, 100);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(results).to.deep.equal([0, 0, 1, 1, 2, 2, 3, 3]);
+                    done();
+                });
+            });
+
+
+            it('creates empty array when iterator returns no results', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.concat(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(null);
+                    }, 100);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(results).to.deep.equal([]);
+                    done();
+                });
+            });
+        });
+
+        describe('#concatSeries', function () {
+
+            it('concatenates results in series', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Nasync.concatSeries(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(null, [item, item]);
+                    }, 100);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([0, 1, 2, 3]);
+                    expect(results).to.deep.equal([0, 0, 1, 1, 2, 2, 3, 3]);
+                    done();
+                });
+            });
+        });
+
+        describe('#sortBy', function () {
+
+            it('performs an asynchronous sort', function (done) {
+
+                var arr = [3, 1, 0, 2, 0];
+
+                Nasync.sortBy(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(null, item);
+                    }, 50);
+                }, function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(arr).to.deep.equal([3, 1, 0, 2, 0]);
+                    expect(result).to.deep.equal([0, 0, 1, 2, 3]);
+                    done();
+                });
+            });
+
+            it('handles errors properly', function (done) {
+
+                var arr = [3, 1, 0, 2, 0];
+
+                Nasync.sortBy(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        if (item === 2) {
+                            return callback(new Error('foo'));
+                        }
+
+                        callback(null, item);
+                    }, 50);
+                }, function (err, result) {
+
+                    expect(err).to.exist();
+                    expect(arr).to.deep.equal([3, 1, 0, 2, 0]);
+                    expect(result).to.not.exist();
+                    done();
+                });
             });
         });
     });
