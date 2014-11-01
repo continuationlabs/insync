@@ -1281,6 +1281,45 @@ describe('Nasync', function () {
                 });
             });
         });
+
+        describe('#forever', function () {
+
+            it('runs an infinite loop', function (done) {
+
+                var count = 0;
+
+                Nasync.forever(function (callback) {
+
+                    setImmediate(function () {
+
+                        count++;
+
+                        if (count === 50) {
+                            return callback(new Error('enough'));
+                        }
+
+                        callback();
+                    });
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(50);
+                    done();
+                });
+            });
+
+            it('throws if no callback is provided', function (done) {
+
+                expect(function () {
+
+                    Nasync.forever(function (callback) {
+
+                        callback(new Error('foo'));
+                    });
+                }).to.throw();
+                done();
+            });
+        });
     });
 
     describe('Util', function () {
