@@ -862,6 +862,53 @@ describe('Nasync', function () {
                 });
             });
         });
+
+        describe('#parallel', function () {
+
+            it('executes array of functions in parallel', function (done) {
+
+                Nasync.parallel([
+                    function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
+                    function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
+                    function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                ], function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([0, 1, [2, 3]]);
+                    done();
+                });
+            });
+
+            it('executes object of functions in parallel', function (done) {
+
+                Nasync.parallel({
+                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
+                    one: function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
+                    two: function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
+                    done();
+                });
+            });
+
+            it('handles case where no callback is provided', function (done) {
+
+                var noop = Common.noop;
+
+                Common.noop = function (error) {
+
+                    Common.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Nasync.parallel({
+                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) }
+                });
+            });
+        });
     });
 
     describe('Util', function () {
