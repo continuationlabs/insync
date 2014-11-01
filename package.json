@@ -3,7 +3,7 @@
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "main": "index",
   "author": "Colin Ihrig <cjihrig@gmail.com> (http://www.cjihrig.com/)",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "homepage": "https://github.com/cjihrig/nasync",
   "repository": {
     "type": "git",
