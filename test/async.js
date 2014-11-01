@@ -770,6 +770,98 @@ describe('Nasync', function () {
 
     describe('Flow', function () {
 
+        describe('#series', function () {
+
+            it('executes array of functions in series', function (done) {
+
+                Nasync.series([
+                    function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
+                    function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
+                    function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                ], function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([0, 1, [2, 3]]);
+                    done();
+                });
+            });
+
+            it('executes object of functions in series', function (done) {
+
+                Nasync.series({
+                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
+                    one: function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
+                    two: function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
+                    done();
+                });
+            });
+
+            it('handles array functions that call back with no arguments', function (done) {
+
+                Nasync.series([
+                    function (callback) { setTimeout(function () { callback(); }, 100) }
+                ], function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([undefined]);
+                    done();
+                });
+            });
+
+            it('handles object functions that call back with no arguments', function (done) {
+
+                Nasync.series({
+                    zero: function (callback) { setTimeout(function () { callback(); }, 100) }
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal({ zero: undefined });
+                    done();
+                });
+            });
+
+            it('handles errors when an array is passed', function (done) {
+
+                Nasync.series([
+                    function (callback) { setTimeout(function () { callback(new Error('foo')); }, 100) }
+                ], function (err, results) {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+
+            it('handles errors when an object is passed', function (done) {
+
+                Nasync.series({
+                    zero: function (callback) { setTimeout(function () { callback(new Error('foo')); }, 100) }
+                }, function (err, results) {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+
+            it('handles case where no callback is provided', function (done) {
+
+                var noop = Common.noop;
+
+                Common.noop = function (error) {
+
+                    Common.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Nasync.series({
+                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) }
+                });
+            });
+        });
     });
 
     describe('Util', function () {

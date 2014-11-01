@@ -1170,24 +1170,6 @@ exports['detectSeries'] = function(test){
     }, 200);
 };
 
-exports['sortBy'] = function(test){
-    async.sortBy([{a:1},{a:15},{a:6}], function(x, callback){
-        setTimeout(function(){callback(null, x.a);}, 0);
-    }, function(err, result){
-        test.same(result, [{a:1},{a:6},{a:15}]);
-        test.done();
-    });
-};
-
-exports['sortBy inverted'] = function(test){
-    async.sortBy([{a:1},{a:15},{a:6}], function(x, callback){
-        setTimeout(function(){callback(null, x.a*-1);}, 0);
-    }, function(err, result){
-        test.same(result, [{a:15},{a:6},{a:1}]);
-        test.done();
-    });
-};
-
 exports['apply'] = function(test){
     test.expect(6);
     var fn = function(){
@@ -1273,42 +1255,6 @@ exports['timesSeries error'] = function(test){
     setTimeout(test.done, 50);
 };
 
-console_fn_tests('log');
-console_fn_tests('dir');
-/*console_fn_tests('info');
-console_fn_tests('warn');
-console_fn_tests('error');*/
-
-exports['nextTick'] = function(test){
-    var call_order = [];
-    async.nextTick(function(){call_order.push('two');});
-    call_order.push('one');
-    setTimeout(function(){
-        test.same(call_order, ['one','two']);
-        test.done();
-    }, 50);
-};
-
-exports['nextTick in the browser'] = function(test){
-    if (typeof process !== 'undefined') {
-        // skip this test in node
-        return test.done();
-    }
-    test.expect(1);
-
-    var call_order = [];
-    async.nextTick(function(){call_order.push('two');});
-
-    call_order.push('one');
-    setTimeout(function(){
-        if (typeof process !== 'undefined') {
-            process.nextTick = _nextTick;
-        }
-        test.same(call_order, ['one','two']);
-    }, 50);
-    setTimeout(test.done, 100);
-};
-
 exports['noConflict - node only'] = function(test){
     if (typeof process !== 'undefined') {
         // node only test
@@ -1340,58 +1286,6 @@ exports['noConflict - node only'] = function(test){
         });
     }
     else test.done();
-};
-
-exports['concat'] = function(test){
-    var call_order = [];
-    var iterator = function (x, cb) {
-        setTimeout(function(){
-            call_order.push(x);
-            var r = [];
-            while (x > 0) {
-                r.push(x);
-                x--;
-            }
-            cb(null, r);
-        }, x*25);
-    };
-    async.concat([1,3,2], iterator, function(err, results){
-        test.same(results, [1,2,1,3,2,1]);
-        test.same(call_order, [1,2,3]);
-        test.ok(!err);
-        test.done();
-    });
-};
-
-exports['concat error'] = function(test){
-    var iterator = function (x, cb) {
-        cb(new Error('test error'));
-    };
-    async.concat([1,2,3], iterator, function(err, results){
-        test.ok(err);
-        test.done();
-    });
-};
-
-exports['concatSeries'] = function(test){
-    var call_order = [];
-    var iterator = function (x, cb) {
-        setTimeout(function(){
-            call_order.push(x);
-            var r = [];
-            while (x > 0) {
-                r.push(x);
-                x--;
-            }
-            cb(null, r);
-        }, x*25);
-    };
-    async.concatSeries([1,3,2], iterator, function(err, results){
-        test.same(results, [1,3,2,1,2,1]);
-        test.same(call_order, [1,3,2]);
-        test.ok(!err);
-        test.done();
-    });
 };
 
 exports['until'] = function (test) {
