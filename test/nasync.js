@@ -774,13 +774,16 @@ describe('Nasync', function () {
 
             it('executes array of functions in series', function (done) {
 
+                var callOrder = [];
+
                 Nasync.series([
-                    function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
-                    function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
-                    function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
                 ], function (err, results) {
 
                     expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([0, 1, 2]);
                     expect(results).to.deep.equal([0, 1, [2, 3]]);
                     done();
                 });
@@ -788,14 +791,27 @@ describe('Nasync', function () {
 
             it('executes object of functions in series', function (done) {
 
+                var callOrder = [];
+
                 Nasync.series({
-                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
-                    one: function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
-                    two: function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                    zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 100) },
+                    one: function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
+                    two: function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
                 }, function (err, results) {
 
                     expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([0, 1, 2]);
                     expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
+                    done();
+                });
+            });
+
+            it('handles empty array of functions', function (done) {
+
+                Nasync.series([], function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([]);
                     done();
                 });
             });
@@ -867,13 +883,16 @@ describe('Nasync', function () {
 
             it('executes array of functions in parallel', function (done) {
 
+                var callOrder = [];
+
                 Nasync.parallel([
-                    function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
-                    function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
-                    function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
+                    function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
                 ], function (err, results) {
 
                     expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 0, 1]);
                     expect(results).to.deep.equal([0, 1, [2, 3]]);
                     done();
                 });
@@ -881,13 +900,16 @@ describe('Nasync', function () {
 
             it('executes object of functions in parallel', function (done) {
 
+                var callOrder = [];
+
                 Nasync.parallel({
-                    zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) },
-                    one: function (callback) { setTimeout(function () { callback(null, 1); }, 100) },
-                    two: function (callback) { setTimeout(function () { callback(null, 2, 3); }, 100) },
+                    zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
+                    one: function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
+                    two: function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
                 }, function (err, results) {
 
                     expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 0, 1]);
                     expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
                     done();
                 });
@@ -906,6 +928,356 @@ describe('Nasync', function () {
 
                 Nasync.parallel({
                     zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) }
+                });
+            });
+        });
+
+        describe('#whilst', function () {
+
+            it('executes an asynchronous while loop', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.whilst(function () {
+
+                    callOrder.push(['test', count]);
+                    return count < 5;
+                }, function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback();
+                    }, 10);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['test', 0],
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('handles errors in iterator', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.whilst(function () {
+
+                    callOrder.push(['test', count]);
+                    return count < 5;
+                }, function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+                        count++;
+
+                        if (count === 2) {
+                            return callback(new Error('foo'));
+                        }
+
+                        callback();
+                    }, 50);
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(2);
+                    expect(callOrder).to.deep.equal([
+                        ['test', 0],
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1]
+                    ]);
+                    done();
+                });
+            });
+        });
+
+        describe('#doWhilst', function () {
+
+            it('executes an asynchronous do...while loop', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doWhilst(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback();
+                    }, 10);
+                }, function () {
+
+                    callOrder.push(['test', count]);
+                    return count < 5;
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('iterator calls back with arguments', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doWhilst(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback(null, count);
+                    }, 10);
+                }, function (cnt) {
+
+                    callOrder.push(['test', cnt]);
+                    return cnt < 5;
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('handles errors in iterator', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doWhilst(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+                        count++;
+
+                        if (count === 2) {
+                            return callback(new Error('foo'));
+                        }
+
+                        callback();
+                    }, 50);
+                }, function () {
+
+                    callOrder.push(['test', count]);
+                    return count < 5;
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(2);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1]
+                    ]);
+                    done();
+                });
+            });
+        });
+
+        describe('#until', function () {
+
+            it('executes an asynchronous until loop', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.until(function () {
+
+                    callOrder.push(['test', count]);
+                    return count === 5;
+                }, function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback();
+                    }, 10);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['test', 0],
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('handles errors in iterator', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.until(function () {
+
+                    callOrder.push(['test', count]);
+                    return count === 5;
+                }, function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+                        count++;
+
+                        if (count === 2) {
+                            return callback(new Error('foo'));
+                        }
+
+                        callback();
+                    }, 50);
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(2);
+                    expect(callOrder).to.deep.equal([
+                        ['test', 0],
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1]
+                    ]);
+                    done();
+                });
+            });
+        });
+
+        describe('#doUntil', function () {
+
+            it('executes an asynchronous do...until loop', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doUntil(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback();
+                    }, 10);
+                }, function () {
+
+                    callOrder.push(['test', count]);
+                    return count === 5;
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('iterator calls back with arguments', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doUntil(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+
+                        count++;
+                        callback(null, count);
+                    }, 10);
+                }, function (cnt) {
+
+                    callOrder.push(['test', cnt]);
+                    return cnt === 5;
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(count).to.equal(5);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1], ['test', 2],
+                        ['iterator', 2], ['test', 3],
+                        ['iterator', 3], ['test', 4],
+                        ['iterator', 4], ['test', 5]
+                    ]);
+                    done();
+                });
+            });
+
+            it('handles errors in iterator', function (done) {
+
+                var callOrder = [];
+                var count = 0;
+
+                Nasync.doUntil(function (callback) {
+
+                    callOrder.push(['iterator', count]);
+
+                    setTimeout(function () {
+                        count++;
+
+                        if (count === 2) {
+                            return callback(new Error('foo'));
+                        }
+
+                        callback();
+                    }, 50);
+                }, function () {
+
+                    callOrder.push(['test', count]);
+                    return count === 5;
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(2);
+                    expect(callOrder).to.deep.equal([
+                        ['iterator', 0], ['test', 1],
+                        ['iterator', 1]
+                    ]);
+                    done();
                 });
             });
         });
