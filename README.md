@@ -2,6 +2,8 @@
 
 [![Current Version](https://img.shields.io/npm/v/nasync.svg)](https://www.npmjs.org/package/nasync)
 [![Build Status via Travis CI](https://travis-ci.org/cjihrig/nasync.svg?branch=master)](https://travis-ci.org/cjihrig/nasync)
+![Dependencies](http://img.shields.io/david/cjihrig/nasync.svg)
+![devDependencies](http://img.shields.io/david/dev/cjihrig/nasync.svg)
 
 Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async is the goal for version 1.0.0.
 
