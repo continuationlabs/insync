@@ -1466,6 +1466,588 @@ describe('Nasync', function () {
                 });
             });
         });
+
+        describe('#applyEach', function () {
+
+            it('applies the supplied arguments to each function in the list', function (done) {
+
+                var callOrder = [];
+                var one = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(1);
+                        callback(null, 1);
+                    }, 100);
+                };
+                var two = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(2);
+                        callback(null, 2);
+                    }, 50);
+                };
+                var three = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(3);
+                        callback(null, 3);
+                    }, 150);
+                };
+                Nasync.applyEach([one, two, three], 5, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 1, 3]);
+                    done();
+                });
+            });
+        });
+
+        describe('#applyEachSeries', function () {
+
+            it('applies the supplied arguments to each function in the list in order', function (done) {
+
+                var callOrder = [];
+                var one = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(1);
+                        callback(null, 1);
+                    }, 100);
+                };
+                var two = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(2);
+                        callback(null, 2);
+                    }, 50);
+                };
+                var three = function (val, callback) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(3);
+                        callback(null, 3);
+                    }, 150);
+                };
+                Nasync.applyEachSeries([one, two, three], 5, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([1, 2, 3]);
+                    done();
+                });
+            });
+        });
+
+        describe('#parallelLimit', function () {
+
+            it('executes array of functions in parallel with a limit', function (done) {
+
+                var callOrder = [];
+
+                Nasync.parallelLimit([
+                    function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
+                    function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
+                    function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 25) }
+                ], 2, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([0, 2, 1]);
+                    expect(results).to.deep.equal([0, 1, [2, 3]]);
+                    done();
+                });
+            });
+        });
+
+        describe('#compose', function () {
+
+            it('creates a function which is a composition of the passed asynchronous functions', function (done) {
+
+                var add2 = function (n, cb) {
+
+                    expect(n).to.equal(3);
+                    setTimeout(function () {
+
+                        cb(null, n + 2);
+                    }, 50);
+                };
+                var mul3 = function (n, cb) {
+
+                    expect(n).to.equal(5);
+                    setTimeout(function () {
+
+                        cb(null, n * 3);
+                    }, 15);
+                };
+                var add1 = function (n, cb) {
+
+                    expect(n).to.equal(15);
+                    setTimeout(function () {
+
+                        cb(null, n + 1);
+                    }, 100);
+                };
+                var add2mul3add1 = Nasync.compose(add1, mul3, add2);
+                add2mul3add1(3, function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal(16);
+                    done();
+                });
+
+            });
+        });
+
+        describe('#queue', function () {
+
+            var generateTask = function (queue, call_order, expectLengh, processNumber) {
+
+                return function (err, arg) {
+
+                    expect(err).to.equal('error');
+                    expect(arg).to.equal('arg');
+                    expect(queue.length()).to.equal(expectLengh);
+                    call_order.push('callback ' + processNumber);
+                }
+            };
+
+            it('creates a queue object with the specified concurrency.', function (done) {
+
+                var call_order = [],
+                    delays = [160, 80, 240, 80];
+                var q = Nasync.queue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        call_order.push('process ' + task);
+                        callback('error', 'arg');
+                    }, delays.shift());
+                }, 2);
+
+                var genTask = generateTask.bind(null, q, call_order);
+
+                q.push(1, genTask(1, 1));
+                q.push(2, genTask(2, 2));
+                q.push(3, genTask(0, 3));
+                q.push(4, genTask(0, 4));
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(2);
+
+                q.drain = function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 2', 'callback 2',
+                        'process 1', 'callback 1',
+                        'process 4', 'callback 4',
+                        'process 3', 'callback 3'
+                    ]);
+
+                    expect(q.concurrency).to.equal(2);
+                    expect(q.length()).to.equal(0);
+                    done();
+                };
+
+            });
+
+            it('creates a queue object with the default concurrency of 1.', function (done) {
+
+                var call_order = [],
+                    delays = [160, 80, 240, 80];
+                var q = Nasync.queue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        call_order.push('process ' + task);
+                        callback('error', 'arg');
+                    }, delays.shift());
+                });
+
+                var genTask = generateTask.bind(null, q, call_order);
+
+                q.push(1, genTask(3, 1));
+                q.push(2, genTask(2, 2));
+                q.push(3, genTask(1, 3));
+                q.push(4, genTask(0, 4));
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(1);
+
+                q.drain = function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 1', 'callback 1',
+                        'process 2', 'callback 2',
+                        'process 3', 'callback 3',
+                        'process 4', 'callback 4'
+                    ]);
+
+                    expect(q.concurrency).to.equal(1);
+                    expect(q.length()).to.equal(0);
+                    done();
+                };
+
+            });
+
+            it('propagates errors from task objects', function (done) {
+
+                var results = [];
+
+                var q = Nasync.queue(function (shouldError, callback) {
+
+                    callback(shouldError ? new Error() : null);
+                }, 2);
+
+                q.drain = function() {
+
+                    expect(results).to.deep.equal(['bar', 'foo']);
+                    done();
+                };
+
+                q.push(true, function (err) {
+
+                    expect(err).to.exist();
+                    results.push('bar');
+                });
+
+                q.push(false, function (err) {
+
+                    expect(err).to.not.exist();
+                    results.push('foo');
+                });
+            });
+
+            it('supports changing concurrency', function (done) {
+
+                var call_order = [],
+                    delays = [40,20,60,20];
+                var q = Nasync.queue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        call_order.push('process ' + task);
+                        callback('error', 'arg');
+                    }, delays.shift());
+                }, 2);
+
+                var genTask = generateTask.bind(null, q, call_order);
+
+                q.push(1, genTask(3, 1));
+                q.push(2, genTask(2, 2));
+                q.push(3, genTask(1, 3));
+                q.push(4, genTask(0, 4));
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(2);
+                q.concurrency = 1;
+
+                setTimeout(function () {
+                    expect(call_order).to.deep.equal([
+                        'process 1', 'callback 1',
+                        'process 2', 'callback 2',
+                        'process 3', 'callback 3',
+                        'process 4', 'callback 4'
+                    ]);
+
+                    expect(q.length()).to.equal(0);
+                    expect(q.concurrency).to.equal(1);
+
+                    done();
+                }, 250);
+            });
+
+            it('supports tasks without callback functions', function (done) {
+
+                var call_order = [],
+                    delays = [160,80,240,80];
+                var q = Nasync.queue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        call_order.push('process ' + task);
+                        callback('error', 'arg');
+                    }, delays.shift());
+                }, 2);
+
+                q.push(1);
+                q.push(2);
+                q.push(3);
+                q.push(4);
+
+                setTimeout(function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 2',
+                        'process 1',
+                        'process 4',
+                        'process 3'
+                    ]);
+                    done();
+                }, 800);
+            });
+
+            it('supports unshifting tasks', function (done) {
+
+                var queue_order = [];
+                var q = Nasync.queue(function (task, callback) {
+
+                    queue_order.push(task);
+                    callback();
+                }, 1);
+
+                q.unshift(4);
+                q.unshift(3);
+                q.unshift(2);
+                q.unshift(1);
+
+                setTimeout(function () {
+
+                    expect(queue_order).to.deep.equal([1, 2, 3, 4]);
+                    done();
+                }, 100);
+            });
+
+            it('throws an error when executing callback too many times', function (done) {
+
+                var q = Nasync.queue(function (task, callback) {
+
+                    callback();
+                    expect(function() {
+                        callback();
+                    }).to.throw();
+                    done();
+                });
+
+                q.push(1);
+            });
+
+            it('supports queing an array of tasks', function (done) {
+
+                var call_order = [],
+                    delays = [160, 80, 240, 80];
+                var q = Nasync.queue(function (task, callback) {
+                    setTimeout(function () {
+                        call_order.push('process ' + task);
+                        callback('error', task);
+                    }, delays.shift());
+                }, 2);
+
+                q.push([1, 2, 3, 4], function (err, arg) {
+
+                    expect(err).to.equal('error');
+                    call_order.push('callback ' + arg);
+                });
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(2);
+
+                setTimeout(function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 2', 'callback 2',
+                        'process 1', 'callback 1',
+                        'process 4', 'callback 4',
+                        'process 3', 'callback 3'
+                    ]);
+                    expect(q.concurrency).to.equal(2);
+                    expect(q.length()).to.equal(0);
+                    done();
+                }, 800);
+            });
+
+            it('keeps track of idle state', function (done) {
+
+                var q = Nasync.queue(function (task, callback) {
+
+                    expect(q.idle()).to.be.false();
+                    callback();
+                }, 1);
+
+                expect(q.idle()).to.be.true();
+
+                q.unshift(4);
+                q.unshift(3);
+                q.unshift(2);
+                q.unshift(1);
+
+                expect(q.idle()).to.be.false();
+
+                q.drain = function() {
+
+                    expect(q.idle()).to.be.true();
+                    done();
+                };
+            });
+
+            it('supports pausing', function (done) {
+
+                var call_order = [],
+                    task_timeout = 100,
+                    pause_timeout = 300,
+                    resume_timeout = 500,
+                    tasks = [1, 2, 3, 4, 5, 6],
+
+                    elapsed = (function () {
+
+                        var start = Date.now();
+                        return function () {
+
+                            return Math.floor((Date.now() - start) / 100) * 100;
+                        };
+                    }());
+
+                var q = Nasync.queue(function (task, callback) {
+
+                    call_order.push('process ' + task);
+                    call_order.push('timeout ' + elapsed());
+                    callback();
+                });
+
+                function pushTask () {
+
+                    var task = tasks.shift();
+                    if (!task) {
+                        return;
+                    }
+                    setTimeout(function () {
+
+                        q.push(task);
+                        pushTask();
+                    }, task_timeout);
+                }
+                pushTask();
+
+                setTimeout(function () {
+
+                    q.pause();
+                    expect(q.paused).to.be.true();
+                }, pause_timeout);
+
+                setTimeout(function () {
+
+                    q.resume();
+                    expect(q.paused).to.be.false();
+                }, resume_timeout);
+
+                setTimeout(function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 1', 'timeout 100',
+                        'process 2', 'timeout 200',
+                        'process 3', 'timeout 500',
+                        'process 4', 'timeout 500',
+                        'process 5', 'timeout 500',
+                        'process 6', 'timeout 600'
+                    ]);
+                    done();
+                }, 800);
+            });
+
+            it('supports pausing with concurrency', function (done) {
+
+                var call_order = [],
+                    task_timeout = 100,
+                    pause_timeout = 300,
+                    resume_timeout = 500,
+                    tasks = [1, 2, 3, 4, 5, 6],
+
+                    elapsed = (function () {
+
+                        var start = Date.now();
+                        return function () {
+
+                            return Math.floor((Date.now() - start) / 100) * 100;
+                        };
+                    }());
+
+                var q = Nasync.queue(function (task, callback) {
+
+                    call_order.push('process ' + task);
+                    call_order.push('timeout ' + elapsed());
+                    callback();
+                }, 2);
+
+                function pushTask () {
+
+                    var task = tasks.shift();
+                    if (!task) {
+                        return;
+                    }
+                    setTimeout(function () {
+
+                        q.push(task);
+                        pushTask();
+                    }, task_timeout);
+                }
+                pushTask();
+
+                setTimeout(function () {
+
+                    q.pause();
+                    expect(q.paused).to.be.true();
+                }, pause_timeout);
+
+                setTimeout(function () {
+
+                    q.resume();
+                    expect(q.paused).to.be.false();
+                }, resume_timeout);
+
+                setTimeout(function () {
+
+                    expect(call_order).to.deep.equal([
+                        'process 1', 'timeout 100',
+                        'process 2', 'timeout 200',
+                        'process 3', 'timeout 500',
+                        'process 4', 'timeout 500',
+                        'process 5', 'timeout 500',
+                        'process 6', 'timeout 600'
+                    ]);
+                    done();
+                }, 800);
+            });
+
+            it('supports killing the queue', function (done) {
+
+                var callbackCalled = false;
+                var drainCalled = false;
+
+                var q = Nasync.queue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        callbackCalled = true;
+                        callback();
+                    }, 300);
+                });
+                q.drain = function() {
+
+                    drainCalled = true;
+                };
+
+                q.push(0);
+
+                q.kill();
+
+                setTimeout(function() {
+
+                    expect(q.length()).to.equal(0);
+                    expect(drainCalled).to.be.false();
+                    expect(callbackCalled).to.be.false();
+                    done();
+                }, 600)
+            });
+        });
     });
 
     describe('Util', function () {
