@@ -1320,6 +1320,152 @@ describe('Nasync', function () {
                 done();
             });
         });
+
+        describe('#waterfall', function () {
+
+            it('runs tasks in a waterfall', function (done) {
+
+                var callOrder = [];
+
+                Nasync.waterfall([
+                    function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push(0);
+                            callback(null, 0);
+                        }, 5);
+                    },
+                    function (arg0, callback) {
+
+                        expect(arg0).to.equal(0);
+                        setTimeout(function () {
+
+                            callOrder.push(1);
+                            callback(null, 1, arg0);
+                        }, 2);
+                    },
+                    function (arg1, arg0, callback) {
+
+                        expect(arg1).to.equal(1);
+                        expect(arg0).to.equal(0);
+                        callOrder.push(2);
+                        callback(null, arg0, arg1, 2);
+                    }
+                ], function (err, arg0, arg1, arg2) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([0, 1, 2]);
+                    expect(arg0).to.equal(0);
+                    expect(arg1).to.equal(1);
+                    expect(arg2).to.equal(2);
+                    done();
+                });
+            });
+
+            it('handles an empty array of tasks', function (done) {
+
+                Nasync.waterfall([], function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('works if final callback function is not provided', function (done) {
+
+                var noop = Common.noop;
+
+                Common.noop = function (error) {
+
+                    Common.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Nasync.waterfall([]);
+            });
+
+            it('errors if an array is not passed as first argument', function (done) {
+
+                Nasync.waterfall(null, function (err) {
+
+                    expect(err).to.exist();
+                    expect(arguments.length).to.equal(1);
+                    done();
+                });
+            });
+
+            it('handles errors in tasks', function (done) {
+
+                var callOrder = [];
+
+                Nasync.waterfall([
+                    function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push(0);
+                            callback(null, 0);
+                        }, 5);
+                    },
+                    function (arg0, callback) {
+
+                        expect(arg0).to.equal(0);
+                        setTimeout(function () {
+
+                            callOrder.push(1);
+                            callback(new Error('foo'));
+                        }, 2);
+                    },
+                    function (callback) {
+
+                        expect(false).to.equal(true);
+                    }
+                ], function (err) {
+
+                    expect(err).to.exist();
+                    expect(callOrder).to.deep.equal([0, 1]);
+                    done();
+                });
+            });
+        });
+
+        describe('#times', function () {
+
+            it('executes a function a number of times', function (done) {
+
+                Nasync.times(5, function (n, callback) {
+
+                    setTimeout(function () { callback(null, n); }, 10);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([0, 1, 2, 3, 4]);
+                    done();
+                });
+            });
+        });
+
+        describe('#timesSeries', function () {
+
+            it('executes a function a number of times in series', function (done) {
+
+                var callOrder = [];
+
+                Nasync.timesSeries(5, function (n, callback) {
+
+                    callOrder.push(n);
+                    setTimeout(function () { callback(null, n); }, 100 - n * 10);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([0, 1, 2, 3, 4]);
+                    expect(callOrder).to.deep.equal([0, 1, 2, 3, 4]);
+                    done();
+                });
+            });
+        });
     });
 
     describe('Util', function () {

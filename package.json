@@ -23,7 +23,7 @@
     "code": "1.x.x"
   },
   "scripts": {
-    "test": "node node_modules/lab/bin/lab -v -t 76"
+    "test": "node node_modules/lab/bin/lab -v -t 79"
   },
   "keywords": [
     "async",
