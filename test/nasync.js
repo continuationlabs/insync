@@ -1472,6 +1472,7 @@ describe('Nasync', function () {
             it('applies the supplied arguments to each function in the list', function (done) {
 
                 var callOrder = [];
+
                 var one = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1481,6 +1482,7 @@ describe('Nasync', function () {
                         callback(null, 1);
                     }, 100);
                 };
+
                 var two = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1490,6 +1492,7 @@ describe('Nasync', function () {
                         callback(null, 2);
                     }, 50);
                 };
+
                 var three = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1499,6 +1502,7 @@ describe('Nasync', function () {
                         callback(null, 3);
                     }, 150);
                 };
+
                 Nasync.applyEach([one, two, three], 5, function (err) {
 
                     expect(err).to.not.exist();
@@ -1513,6 +1517,7 @@ describe('Nasync', function () {
             it('applies the supplied arguments to each function in the list in order', function (done) {
 
                 var callOrder = [];
+
                 var one = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1522,6 +1527,7 @@ describe('Nasync', function () {
                         callback(null, 1);
                     }, 100);
                 };
+
                 var two = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1531,6 +1537,7 @@ describe('Nasync', function () {
                         callback(null, 2);
                     }, 50);
                 };
+
                 var three = function (val, callback) {
 
                     expect(val).to.equal(5);
@@ -1540,6 +1547,7 @@ describe('Nasync', function () {
                         callback(null, 3);
                     }, 150);
                 };
+
                 Nasync.applyEachSeries([one, two, three], 5, function (err) {
 
                     expect(err).to.not.exist();
@@ -1581,6 +1589,7 @@ describe('Nasync', function () {
                         cb(null, n + 2);
                     }, 50);
                 };
+
                 var mul3 = function (n, cb) {
 
                     expect(n).to.equal(5);
@@ -1589,6 +1598,7 @@ describe('Nasync', function () {
                         cb(null, n * 3);
                     }, 15);
                 };
+
                 var add1 = function (n, cb) {
 
                     expect(n).to.equal(15);
@@ -1597,44 +1607,46 @@ describe('Nasync', function () {
                         cb(null, n + 1);
                     }, 100);
                 };
+
                 var add2mul3add1 = Nasync.compose(add1, mul3, add2);
+
                 add2mul3add1(3, function (err, result) {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal(16);
                     done();
                 });
-
             });
         });
 
         describe('#queue', function () {
 
-            var generateTask = function (queue, call_order, expectLengh, processNumber) {
+            var generateTask = function (queue, callOrder, expectLengh, processNumber) {
 
                 return function (err, arg) {
 
                     expect(err).to.equal('error');
                     expect(arg).to.equal('arg');
                     expect(queue.length()).to.equal(expectLengh);
-                    call_order.push('callback ' + processNumber);
+                    callOrder.push('callback ' + processNumber);
                 }
             };
 
-            it('creates a queue object with the specified concurrency.', function (done) {
+            it('creates a queue object with the specified concurrency', function (done) {
 
-                var call_order = [],
-                    delays = [160, 80, 240, 80];
+                var callOrder = [];
+                var delays = [160, 80, 240, 80];
+
                 var q = Nasync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
-                        call_order.push('process ' + task);
+                        callOrder.push('process ' + task);
                         callback('error', 'arg');
                     }, delays.shift());
                 }, 2);
 
-                var genTask = generateTask.bind(null, q, call_order);
+                var genTask = generateTask.bind(null, q, callOrder);
 
                 q.push(1, genTask(1, 1));
                 q.push(2, genTask(2, 2));
@@ -1646,7 +1658,7 @@ describe('Nasync', function () {
 
                 q.drain = function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 2', 'callback 2',
                         'process 1', 'callback 1',
                         'process 4', 'callback 4',
@@ -1657,23 +1669,23 @@ describe('Nasync', function () {
                     expect(q.length()).to.equal(0);
                     done();
                 };
-
             });
 
-            it('creates a queue object with the default concurrency of 1.', function (done) {
+            it('creates a queue object with the default concurrency of one', function (done) {
 
-                var call_order = [],
-                    delays = [160, 80, 240, 80];
+                var callOrder = [];
+                var delays = [160, 80, 240, 80];
+
                 var q = Nasync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
-                        call_order.push('process ' + task);
+                        callOrder.push('process ' + task);
                         callback('error', 'arg');
                     }, delays.shift());
                 });
 
-                var genTask = generateTask.bind(null, q, call_order);
+                var genTask = generateTask.bind(null, q, callOrder);
 
                 q.push(1, genTask(3, 1));
                 q.push(2, genTask(2, 2));
@@ -1685,7 +1697,7 @@ describe('Nasync', function () {
 
                 q.drain = function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 1', 'callback 1',
                         'process 2', 'callback 2',
                         'process 3', 'callback 3',
@@ -1696,7 +1708,6 @@ describe('Nasync', function () {
                     expect(q.length()).to.equal(0);
                     done();
                 };
-
             });
 
             it('propagates errors from task objects', function (done) {
@@ -1708,7 +1719,7 @@ describe('Nasync', function () {
                     callback(shouldError ? new Error() : null);
                 }, 2);
 
-                q.drain = function() {
+                q.drain = function () {
 
                     expect(results).to.deep.equal(['bar', 'foo']);
                     done();
@@ -1729,18 +1740,18 @@ describe('Nasync', function () {
 
             it('supports changing concurrency', function (done) {
 
-                var call_order = [],
-                    delays = [40,20,60,20];
+                var callOrder = [];
+                var delays = [40,20,60,20];
                 var q = Nasync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
-                        call_order.push('process ' + task);
+                        callOrder.push('process ' + task);
                         callback('error', 'arg');
                     }, delays.shift());
                 }, 2);
 
-                var genTask = generateTask.bind(null, q, call_order);
+                var genTask = generateTask.bind(null, q, callOrder);
 
                 q.push(1, genTask(3, 1));
                 q.push(2, genTask(2, 2));
@@ -1752,7 +1763,7 @@ describe('Nasync', function () {
                 q.concurrency = 1;
 
                 setTimeout(function () {
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 1', 'callback 1',
                         'process 2', 'callback 2',
                         'process 3', 'callback 3',
@@ -1768,13 +1779,14 @@ describe('Nasync', function () {
 
             it('supports tasks without callback functions', function (done) {
 
-                var call_order = [],
-                    delays = [160,80,240,80];
+                var callOrder = [];
+                var delays = [160, 80, 240, 80];
+
                 var q = Nasync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
-                        call_order.push('process ' + task);
+                        callOrder.push('process ' + task);
                         callback('error', 'arg');
                     }, delays.shift());
                 }, 2);
@@ -1786,7 +1798,7 @@ describe('Nasync', function () {
 
                 setTimeout(function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 2',
                         'process 1',
                         'process 4',
@@ -1798,10 +1810,10 @@ describe('Nasync', function () {
 
             it('supports unshifting tasks', function (done) {
 
-                var queue_order = [];
+                var queueOrder = [];
                 var q = Nasync.queue(function (task, callback) {
 
-                    queue_order.push(task);
+                    queueOrder.push(task);
                     callback();
                 }, 1);
 
@@ -1812,7 +1824,7 @@ describe('Nasync', function () {
 
                 setTimeout(function () {
 
-                    expect(queue_order).to.deep.equal([1, 2, 3, 4]);
+                    expect(queueOrder).to.deep.equal([1, 2, 3, 4]);
                     done();
                 }, 100);
             });
@@ -1823,6 +1835,7 @@ describe('Nasync', function () {
 
                     callback();
                     expect(function() {
+
                         callback();
                     }).to.throw();
                     done();
@@ -1833,11 +1846,14 @@ describe('Nasync', function () {
 
             it('supports queing an array of tasks', function (done) {
 
-                var call_order = [],
-                    delays = [160, 80, 240, 80];
+                var callOrder = [];
+                var delays = [160, 80, 240, 80];
+
                 var q = Nasync.queue(function (task, callback) {
+
                     setTimeout(function () {
-                        call_order.push('process ' + task);
+
+                        callOrder.push('process ' + task);
                         callback('error', task);
                     }, delays.shift());
                 }, 2);
@@ -1845,7 +1861,7 @@ describe('Nasync', function () {
                 q.push([1, 2, 3, 4], function (err, arg) {
 
                     expect(err).to.equal('error');
-                    call_order.push('callback ' + arg);
+                    callOrder.push('callback ' + arg);
                 });
 
                 expect(q.length()).to.equal(4);
@@ -1853,7 +1869,7 @@ describe('Nasync', function () {
 
                 setTimeout(function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 2', 'callback 2',
                         'process 1', 'callback 1',
                         'process 4', 'callback 4',
@@ -1882,7 +1898,7 @@ describe('Nasync', function () {
 
                 expect(q.idle()).to.be.false();
 
-                q.drain = function() {
+                q.drain = function () {
 
                     expect(q.idle()).to.be.true();
                     done();
@@ -1891,57 +1907,60 @@ describe('Nasync', function () {
 
             it('supports pausing', function (done) {
 
-                var call_order = [],
-                    task_timeout = 100,
-                    pause_timeout = 300,
-                    resume_timeout = 500,
-                    tasks = [1, 2, 3, 4, 5, 6],
+                var callOrder = [];
+                var taskTimeout = 100;
+                var pauseTimeout = 300;
+                var resumeTimeout = 500;
+                var tasks = [1, 2, 3, 4, 5, 6];
 
-                    elapsed = (function () {
+                var elapsed = (function () {
 
-                        var start = Date.now();
-                        return function () {
+                    var start = Date.now();
+                    return function () {
 
-                            return Math.floor((Date.now() - start) / 100) * 100;
-                        };
-                    }());
+                        return Math.floor((Date.now() - start) / 100) * 100;
+                    };
+                }());
 
                 var q = Nasync.queue(function (task, callback) {
 
-                    call_order.push('process ' + task);
-                    call_order.push('timeout ' + elapsed());
+                    callOrder.push('process ' + task);
+                    callOrder.push('timeout ' + elapsed());
                     callback();
                 });
 
-                function pushTask () {
+                var pushTask = function () {
 
                     var task = tasks.shift();
+
                     if (!task) {
                         return;
                     }
+
                     setTimeout(function () {
 
                         q.push(task);
                         pushTask();
-                    }, task_timeout);
-                }
+                    }, taskTimeout);
+                };
+
                 pushTask();
 
                 setTimeout(function () {
 
                     q.pause();
                     expect(q.paused).to.be.true();
-                }, pause_timeout);
+                }, pauseTimeout);
 
                 setTimeout(function () {
 
                     q.resume();
                     expect(q.paused).to.be.false();
-                }, resume_timeout);
+                }, resumeTimeout);
 
                 setTimeout(function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 1', 'timeout 100',
                         'process 2', 'timeout 200',
                         'process 3', 'timeout 500',
@@ -1955,57 +1974,60 @@ describe('Nasync', function () {
 
             it('supports pausing with concurrency', function (done) {
 
-                var call_order = [],
-                    task_timeout = 100,
-                    pause_timeout = 300,
-                    resume_timeout = 500,
-                    tasks = [1, 2, 3, 4, 5, 6],
+                var callOrder = [];
+                var taskTimeout = 100;
+                var pauseTimeout = 300;
+                var resumeTimeout = 500;
+                var tasks = [1, 2, 3, 4, 5, 6];
 
-                    elapsed = (function () {
+                var elapsed = (function () {
 
-                        var start = Date.now();
-                        return function () {
+                    var start = Date.now();
+                    return function () {
 
-                            return Math.floor((Date.now() - start) / 100) * 100;
-                        };
-                    }());
+                        return Math.floor((Date.now() - start) / 100) * 100;
+                    };
+                }());
 
                 var q = Nasync.queue(function (task, callback) {
 
-                    call_order.push('process ' + task);
-                    call_order.push('timeout ' + elapsed());
+                    callOrder.push('process ' + task);
+                    callOrder.push('timeout ' + elapsed());
                     callback();
                 }, 2);
 
-                function pushTask () {
+                var pushTask = function () {
 
                     var task = tasks.shift();
+
                     if (!task) {
                         return;
                     }
+
                     setTimeout(function () {
 
                         q.push(task);
                         pushTask();
-                    }, task_timeout);
-                }
+                    }, taskTimeout);
+                };
+
                 pushTask();
 
                 setTimeout(function () {
 
                     q.pause();
                     expect(q.paused).to.be.true();
-                }, pause_timeout);
+                }, pauseTimeout);
 
                 setTimeout(function () {
 
                     q.resume();
                     expect(q.paused).to.be.false();
-                }, resume_timeout);
+                }, resumeTimeout);
 
                 setTimeout(function () {
 
-                    expect(call_order).to.deep.equal([
+                    expect(callOrder).to.deep.equal([
                         'process 1', 'timeout 100',
                         'process 2', 'timeout 200',
                         'process 3', 'timeout 500',
@@ -2030,6 +2052,7 @@ describe('Nasync', function () {
                         callback();
                     }, 300);
                 });
+
                 q.drain = function() {
 
                     drainCalled = true;
