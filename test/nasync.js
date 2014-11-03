@@ -1467,6 +1467,24 @@ describe('Nasync', function () {
             });
         });
 
+        describe('#apply', function () {
+
+            it('creates a continuation function with applied arguments', function (done) {
+
+                var fn = Nasync.apply(function (num1, num2, callback) {
+
+                    callback(null, num1 + num2);
+                }, 2, 3, function (err, sum) {
+
+                    expect(err).to.not.exist();
+                    expect(sum).to.equal(5);
+                    done();
+                });
+
+                fn();
+            });
+        });
+
         describe('#applyEach', function () {
 
             it('applies the supplied arguments to each function in the list', function (done) {
@@ -2069,6 +2087,154 @@ describe('Nasync', function () {
                     expect(callbackCalled).to.be.false();
                     done();
                 }, 600)
+            });
+        });
+
+        describe('#iterator', function () {
+
+            it('creates an iterator function', function (done) {
+
+                var callOrder = [];
+
+                var iterator = Nasync.iterator([
+                    function () {
+
+                        callOrder.push(1);
+                    },
+                    function (arg1) {
+
+                        expect(arg1).to.equal('arg1');
+                        callOrder.push(2);
+                    },
+                    function (arg1, arg2) {
+
+                        expect(arg1).to.equal('arg1');
+                        expect(arg2).to.equal('arg2');
+                        callOrder.push(3);
+                    }
+                ]);
+
+                iterator();
+                expect(callOrder).to.deep.equal([1]);
+                var iterator2 = iterator();
+                expect(callOrder).to.deep.equal([1, 1]);
+                var iterator3 = iterator2('arg1');
+                expect(callOrder).to.deep.equal([1, 1, 2]);
+                var iterator4 = iterator3('arg1', 'arg2');
+                expect(callOrder).to.deep.equal([1, 1, 2, 3]);
+                expect(iterator4).to.not.exist();
+                done();
+            });
+
+            it('can iterate using next()', function (done) {
+
+                var callOrder = [];
+
+                var iterator = Nasync.iterator([
+                    function () {
+
+                        callOrder.push(1);
+                    },
+                    function (arg1) {
+
+                        expect(arg1).to.equal('arg1');
+                        callOrder.push(2);
+                    },
+                    function (arg1, arg2) {
+
+                        expect(arg1).to.equal('arg1');
+                        expect(arg2).to.equal('arg2');
+                        callOrder.push(3);
+                    }
+                ]);
+
+                var fn = iterator.next();
+                var iterator2 = fn('arg1');
+                expect(callOrder).to.deep.equal([2]);
+                iterator2('arg1','arg2');
+                expect(callOrder).to.deep.equal([2, 3]);
+                expect(iterator2.next()).to.not.exist();
+                done();
+            });
+
+            it('handles an empty array', function (done) {
+
+                var iterator = Nasync.iterator([]);
+
+                expect(iterator()).to.not.exist();
+                expect(iterator.next()).to.not.exist();
+                done();
+            });
+        });
+
+        describe('#retry', function () {
+
+            it('all attempts error', function (done) {
+
+                var times = 3;
+                var callCount = 0;
+
+                var fn = function (callback, results) {
+
+                    callCount++;
+                    callback(new Error(callCount), callCount);
+                };
+
+                Nasync.retry(times, fn, function (err, result) {
+
+                    expect(callCount).to.equal(times);
+                    expect(err).to.exist();
+                    expect(err.message).to.equal(times + '');
+                    expect(result).to.equal(callCount);
+                    done();
+                });
+            });
+
+            it('attempt succeeds', function (done) {
+
+                var callCount = 0;
+                var failed = false;
+
+                var fn = function (callback, results) {
+
+                    callCount++;
+
+                    if (failed) {
+                        return callback(null, callCount);
+                    }
+
+                    failed = true;
+                    callback(new Error(callCount), callCount);
+                };
+
+                Nasync.retry(3, fn, function (err, result) {
+
+                    expect(callCount).to.equal(2);
+                    expect(err).to.not.exist();
+                    expect(result).to.equal(2);
+                    done();
+                });
+            });
+
+            it('uses default number of retries', function (done) {
+
+                var times = 5;
+                var callCount = 0;
+
+                var fn = function (callback, results) {
+
+                    callCount++;
+                    callback(new Error(callCount), callCount);
+                };
+
+                Nasync.retry(fn, function (err, result) {
+
+                    expect(callCount).to.equal(times);
+                    expect(err).to.exist();
+                    expect(err.message).to.equal(times + '');
+                    expect(result).to.equal(callCount);
+                    done();
+                });
             });
         });
     });
