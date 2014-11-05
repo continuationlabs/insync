@@ -2236,6 +2236,241 @@ describe('Nasync', function () {
                     done();
                 });
             });
+
+            it('uses default number of retries if times is falsey', function (done) {
+
+                var times = 5;
+                var callCount = 0;
+
+                var fn = function (callback, results) {
+
+                    callCount++;
+                    callback(new Error(callCount), callCount);
+                };
+
+                Nasync.retry(0, fn, function (err, result) {
+
+                    expect(callCount).to.equal(times);
+                    expect(err).to.exist();
+                    expect(err.message).to.equal(times + '');
+                    expect(result).to.equal(callCount);
+                    done();
+                });
+            });
+
+            it('as an embedded task', function (done) {
+
+                var retryResult = 'RETRY';
+                var fooResults;
+                var retryResults;
+    
+                Nasync.auto({
+                    foo: function (callback, results) {
+
+                        fooResults = results;
+                        callback(null, 'FOO');
+                    },
+                    retry: Nasync.retry(function (callback, results) {
+
+                        retryResults = results;
+                        callback(null, retryResult);
+                    })
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results.retry).to.deep.equal(retryResult);
+                    expect(fooResults).to.equal(retryResults);
+                    done();
+                });
+            });
+        });
+
+        describe('#auto', function () {
+
+            it('determines the best order to run tasks', function (done) {
+
+                var callOrder = [];
+                var testdata = [{ test: 'test' }];
+
+                Nasync.auto({
+                    task1: ['task2', function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push('task1');
+                            callback(null, 1, 10);
+                        }, 25);
+                    }],
+                    task2: function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push('task2');
+                            callback(null, 2);
+                        }, 50);
+                    },
+                    task3: ['task2', function (callback) {
+
+                        callOrder.push('task3');
+                        callback(null, 3);
+                    }],
+                    task4: ['task1', 'task2', function(callback) {
+
+                        callOrder.push('task4');
+                        callback(null, 4);
+                    }],
+                    task5: ['task2', function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push('task5');
+                            callback();
+                        }, 0);
+                    }],
+                    task6: ['task2', function (callback) {
+
+                        callOrder.push('task6');
+                        callback(null, 6);
+                    }]
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal(['task2','task6','task3','task5','task1','task4']);
+                    expect(results).to.deep.equal({
+                        task1: [1, 10],
+                        task2: 2,
+                        task3: 3,
+                        task4: 4,
+                        task5: undefined,
+                        task6: 6
+                    });
+                    done();
+                });
+            });
+
+            it('petrify', function (done) {
+
+                var callOrder = [];
+
+                Nasync.auto({
+                    task1: ['task2', function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push('task1');
+                            callback();
+                        }, 100);
+                    }],
+                    task2: function (callback) {
+
+                        setTimeout(function () {
+
+                            callOrder.push('task2');
+                            callback();
+                        }, 200);
+                    },
+                    task3: ['task2', function (callback) {
+
+                        callOrder.push('task3');
+                        callback();
+                    }],
+                    task4: ['task1', 'task2', function (callback) {
+
+                        callOrder.push('task4');
+                        callback();
+                    }]
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal(['task2', 'task3', 'task1', 'task4']);
+                    done();
+                });
+            });
+
+            it('handles an empty object', function (done) {
+
+                Nasync.auto({}, function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('works when no callback is provided', function (done) {
+
+                var noop = Common.noop;
+
+                Common.noop = function (error) {
+
+                    Common.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Nasync.auto({
+                    task1: function (callback) { callback(); },
+                    task2: ['task1', function (callback) { callback(); }]
+                });
+            });
+
+            it('handles errors from tasks', function (done) {
+
+                Nasync.auto({
+                    task1: function (callback) {
+
+                        callback(new Error(1));
+                    },
+                    task2: ['task1', function (callback) {
+
+                        expect(true).to.equal(false);
+                        callback();
+                    }],
+                    task3: function (callback) {
+
+                        callback(new Error(2));
+                    }
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1');
+                    done();
+                });
+            });
+
+            it('passes partial results on errors', function (done) {
+
+                Nasync.auto({
+                    task1: function (callback) {
+
+                        callback(null, 'result1');
+                    },
+                    task2: ['task1', function (callback) {
+
+                        callback(new Error(1), 'result2');
+                    }],
+                    task3: ['task2', function (callback) {
+
+                        expect(true).to.equal(false);
+                    }]
+                }, function (err, results) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1');
+                    expect(results).to.exist();
+                    expect(results.task1).to.equal('result1');
+                    expect(results.task2).to.equal('result2');
+                    done();
+                });
+            });
+
+            it('removeListener() has side effect on loop iterator', function (done) {
+
+                Nasync.auto({
+                    task1: ['task3', function (callback) { done(); }],
+                    task2: ['task3', function (callback) { /* by design: DON'T call callback */ }],
+                    task3: function (callback) { callback(); }
+                });
+            });
         });
     });
 
