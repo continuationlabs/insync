@@ -1,35 +1,35 @@
-# nasync
+# Insync
 
-[![Current Version](https://img.shields.io/npm/v/nasync.svg)](https://www.npmjs.org/package/nasync)
-[![Build Status via Travis CI](https://travis-ci.org/cjihrig/nasync.svg?branch=master)](https://travis-ci.org/cjihrig/nasync)
-![Dependencies](http://img.shields.io/david/cjihrig/nasync.svg)
-![devDependencies](http://img.shields.io/david/dev/cjihrig/nasync.svg)
+[![Current Version](https://img.shields.io/npm/v/insync.svg)](https://www.npmjs.org/package/insync)
+[![Build Status via Travis CI](https://travis-ci.org/cjihrig/insync.svg?branch=master)](https://travis-ci.org/cjihrig/insync)
+![Dependencies](http://img.shields.io/david/cjihrig/insync.svg)
+![devDependencies](http://img.shields.io/david/dev/cjihrig/insync.svg)
 
 Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async is the goal for version 1.0.0.
 
-nasync is a utility module which provides straight-forward, powerful functions for working with asynchronous JavaScript. Unlike async, nasync is not intended to work in any environment other than Node.js. However, because nasync does not have any dependencies, it should be trivial to use with Browserify. Of course, you could use async too.
+insync is a utility module which provides straight-forward, powerful functions for working with asynchronous JavaScript. Unlike async, insync is not intended to work in any environment other than Node.js. However, because insync does not have any dependencies, it should be trivial to use with Browserify. Of course, you could use async too.
 
-nasync provides around 20 functions that include the usual 'functional' suspects (`map`, `reduce`, `filter`, `each`, etc.) as well as some common patterns for asynchronous control flow (`parallel`, `series`, `waterfall`, etc.). All these functions assume you follow the Node.js convention of providing a single callback as the last argument of your asynchronous function.
+insync provides around 20 functions that include the usual 'functional' suspects (`map`, `reduce`, `filter`, `each`, etc.) as well as some common patterns for asynchronous control flow (`parallel`, `series`, `waterfall`, etc.). All these functions assume you follow the Node.js convention of providing a single callback as the last argument of your asynchronous function.
 
 ## Quick Examples
 
 ```javascript
-Nasync.map(['file1', 'file2', 'file3'], fs.stat, function (err, results) {
+Insync.map(['file1', 'file2', 'file3'], fs.stat, function (err, results) {
 
     // results is now an array of stats for each file
 });
 
-Nasync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
+Insync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
 
     // results now equals an array of the existing files
 });
 
-Nasync.parallel([
+Insync.parallel([
     function () { ... },
     function () { ... }
 ], callback);
 
-Nasync.series([
+Insync.series([
     function () { ... },
     function () { ... }
 ]);
@@ -41,7 +41,7 @@ There are many more functions available so take a look at the docs below for a f
 
 ### Binding a context to an iterator
 
-This section is really about `bind`, not about nasync. If you are wondering how to make nasync execute your iterators in a given context, or are confused as to why a method of another library isn't working as an iterator, study this example:
+This section is really about `bind`, not about insync. If you are wondering how to make insync execute your iterators in a given context, or are confused as to why a method of another library isn't working as an iterator, study this example:
 
 ```javascript
 // Here is a simple object with an (unnecessarily roundabout) squaring method
@@ -58,7 +58,7 @@ var AsyncSquaringLibrary = {
     }
 };
 
-Nasync.map([1, 2, 3], AsyncSquaringLibrary.square, function (err, result) {
+Insync.map([1, 2, 3], AsyncSquaringLibrary.square, function (err, result) {
 
   // result is [NaN, NaN, NaN]
   // This fails because the `this.squareExponent` expression in the square
@@ -66,11 +66,11 @@ Nasync.map([1, 2, 3], AsyncSquaringLibrary.square, function (err, result) {
   // therefore undefined.
 });
 
-Nasync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), function (err, result) {
+Insync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), function (err, result) {
 
   // result is [1, 4, 9]
   // With the help of bind we can attach a context to the iterator before
-  // passing it to nasync. Now the square function will be executed in its 
+  // passing it to insync. Now the square function will be executed in its 
   // 'home' AsyncSquaringLibrary context and the value of `this.squareExponent`
   // will be as expected.
 });
@@ -78,9 +78,9 @@ Nasync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), fu
 
 ## Download
 
-The source is available for download from [GitHub](http://github.com/cjihrig/nasync). Alternatively, you can install using `npm`:
+The source is available for download from [GitHub](http://github.com/cjihrig/insync). Alternatively, you can install using `npm`:
 
-    npm install nasync
+    npm install insync
 
 ## Documentation
 
@@ -166,7 +166,7 @@ __Examples__
 // assuming openFiles is an array of file names and saveFile is a function
 // to save the modified contents of that file:
 
-Nasync.each(openFiles, saveFile, function (err) {
+Insync.each(openFiles, saveFile, function (err) {
 
     // if any of the saves produced an error, err would equal that error
 });
@@ -175,7 +175,7 @@ Nasync.each(openFiles, saveFile, function (err) {
 ```javascript
 // assuming openFiles is an array of file names 
 
-Nasync.each(openFiles, function (file, callback) {
+Insync.each(openFiles, function (file, callback) {
 
     // Perform operation on file here.
     console.log('Processing file ' + file);
@@ -236,7 +236,7 @@ __Example__
 // Assume documents is an array of JSON objects and requestApi is a
 // function that interacts with a rate-limited REST api.
 
-Nasync.eachLimit(documents, 20, requestApi, function (err) {
+Insync.eachLimit(documents, 20, requestApi, function (err) {
 
     // If any of the saves produced an error, err would equal that error
 });
@@ -266,7 +266,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.map(['file1', 'file2', 'file3'], fs.stat, function (err, results) {
+Insync.map(['file1', 'file2', 'file3'], fs.stat, function (err, results) {
 
     // Results is now an array of stats for each file
 });
@@ -302,7 +302,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.mapLimit(['file1', 'file2', 'file3'], 1, fs.stat, function (err, results) {
+Insync.mapLimit(['file1', 'file2', 'file3'], 1, fs.stat, function (err, results) {
 
     // Results is now an array of stats for each file
 });
@@ -330,7 +330,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
+Insync.filter(['file1', 'file2', 'file3'], fs.exists, function (results) {
 
     // Results now equals an array of the existing files
 });
@@ -387,7 +387,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.reduce([1, 2, 3], 0, function (memo, item, callback) {
+Insync.reduce([1, 2, 3], 0, function (memo, item, callback) {
 
     // Pointless async:
     process.nextTick(function () {
@@ -432,7 +432,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.detect(['file1', 'file2', 'file3'], fs.exists, function (result) {
+Insync.detect(['file1', 'file2', 'file3'], fs.exists, function (result) {
 
     // Result now equals the first file in the list that exists
 });
@@ -467,7 +467,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.sortBy(['file1', 'file2', 'file3'], function (file, callback) {
+Insync.sortBy(['file1', 'file2', 'file3'], function (file, callback) {
 
     fs.stat(file, function (err, stats) {
 
@@ -486,7 +486,7 @@ By modifying the callback parameter the sorting order can be influenced:
 
 ```javascript
 // Ascending order
-Nasync.sortBy([1, 9, 3, 5], function (x, callback) {
+Insync.sortBy([1, 9, 3, 5], function (x, callback) {
 
     callback(err, x);
 }, function (err, result) {
@@ -495,7 +495,7 @@ Nasync.sortBy([1, 9, 3, 5], function (x, callback) {
 } );
 
 // Descending order
-Nasync.sortBy([1, 9, 3, 5], function (x, callback) {
+Insync.sortBy([1, 9, 3, 5], function (x, callback) {
 
     callback(err, x*-1);    //<- x*-1 instead of x, turns the order around
 }, function (err, result) {
@@ -526,7 +526,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.some(['file1', 'file2', 'file3'], fs.exists, function (result) {
+Insync.some(['file1', 'file2', 'file3'], fs.exists, function (result) {
 
     // If result is true then at least one of the files exists
 });
@@ -554,7 +554,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.every(['file1', 'file2', 'file3'], fs.exists, function (result) {
+Insync.every(['file1', 'file2', 'file3'], fs.exists, function (result) {
 
     // If result is true then every file exists
 });
@@ -580,7 +580,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.concat(['dir1', 'dir2', 'dir3'], fs.readdir, function (err, files) {
+Insync.concat(['dir1', 'dir2', 'dir3'], fs.readdir, function (err, files) {
 
     // Files is now a list of filenames that exist in the three directories
 });
@@ -620,7 +620,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.series([
+Insync.series([
     function (callback) {
 
         // Do some stuff ...
@@ -640,7 +640,7 @@ function (err, results) {
 
 
 // An example using an object instead of an array
-Nasync.series({
+Insync.series({
     one: function (callback) {
 
         setTimeout(function () {
@@ -683,7 +683,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.parallel([
+Insync.parallel([
     function (callback) {
 
         setTimeout(function () {
@@ -707,7 +707,7 @@ function (err, results) {
 
 
 // An example using an object instead of an array
-Nasync.parallel({
+Insync.parallel({
     one: function (callback) {
 
         setTimeout(function () {
@@ -767,7 +767,7 @@ __Example__
 ```javascript
 var count = 0;
 
-Nasync.whilst(
+Insync.whilst(
     function () { return count < 5; },
     function (callback) {
         count++;
@@ -814,7 +814,7 @@ Calls the asynchronous function `fn` with a callback parameter that allows it to
 If an error is passed to the callback then `errback` is called with the error, and execution stops, otherwise it will never be called.
 
 ```javascript
-Nasync.forever(
+Insync.forever(
     function (next) {
         // next is suitable for passing to things that need a callback(err [, whatever]);
         // It will result in this function being called again.
@@ -845,7 +845,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.waterfall([
+Insync.waterfall([
     function (callback) {
 
         callback(null, 'one', 'two');
@@ -897,7 +897,7 @@ function mul3(n, callback) {
     }, 10);
 }
 
-var add1mul3 = Nasync.compose(mul3, add1);
+var add1mul3 = Insync.compose(mul3, add1);
 
 add1mul3(4, function (err, result) {
 
@@ -940,7 +940,7 @@ app.get('/cats', function (request, response) {
 
     var User = request.models.User;
 
-    Nasync.seq(
+    Insync.seq(
         _.bind(User.get, User),  // 'User.get' has signature (id, callback(err, data))
         handleError,
         function (user, fn) {
@@ -972,12 +972,12 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.applyEach([enableSearch, updateSchema], 'bucket', callback);
+Insync.applyEach([enableSearch, updateSchema], 'bucket', callback);
 
 // partial application example:
-Nasync.each(
+Insync.each(
     buckets,
-    Nasync.applyEach([enableSearch, updateSchema]),
+    Insync.applyEach([enableSearch, updateSchema]),
     callback
 );
 ```
@@ -1034,7 +1034,7 @@ __Example__
 ```javascript
 // Create a queue object with concurrency 2
 
-var q = Nasync.queue(function (task, callback) {
+var q = Insync.queue(function (task, callback) {
 
     console.log('hello ' + task.name);
     callback();
@@ -1127,7 +1127,7 @@ __Example__
 ```javascript
 // Create a cargo object with payload 2
 
-var cargo = Nasync.cargo(function (tasks, callback) {
+var cargo = Insync.cargo(function (tasks, callback) {
 
     for (var i=0, il = tasks.length; i < il; ++i) {
         console.log('hello ' + tasks[i].name);
@@ -1166,8 +1166,8 @@ Note, all functions are called with a `results` object as a second argument, so 
 For example, this snippet of code:
 
 ```javascript
-Nasync.auto({
-    readData: Nasync.apply(fs.readFile, 'data.txt', 'utf-8')
+Insync.auto({
+    readData: Insync.apply(fs.readFile, 'data.txt', 'utf-8')
 }, callback);
 ```
 
@@ -1180,7 +1180,7 @@ fs.readFile('data.txt', 'utf-8', cb, {});
 Instead, wrap the call to `readFile` in a function which does not forward the `results` object:
 
 ```javascript
-Nasync.auto({
+Insync.auto({
     readData: function (cb, results) {
 
         fs.readFile('data.txt', 'utf-8', cb);
@@ -1207,7 +1207,7 @@ __Arguments__
 __Example__
 
 ```javascript
-Nasync.auto({
+Insync.auto({
     get_data: function (callback) {
 
         console.log('in get_data');
@@ -1245,7 +1245,7 @@ Nasync.auto({
 This is a fairly trivial example, but to do this using the basic parallel and series functions would look like this:
 
 ```javascript
-Nasync.parallel([
+Insync.parallel([
     function (callback) {
 
         console.log('in get_data');
@@ -1261,7 +1261,7 @@ Nasync.parallel([
     }
 ],
 function (err, results) {
-    Nasync.series([
+    Insync.series([
         function (callback) {
 
             console.log('in write_file', JSON.stringify(results));
@@ -1302,7 +1302,7 @@ __Arguments__
 The [`retry`](#retry) function can be used as a stand-alone control flow by passing a callback, as shown below:
 
 ```javascript
-Nasync.retry(3, apiMethod, function (err, result) {
+Insync.retry(3, apiMethod, function (err, result) {
 
     // Do something with the result
 });
@@ -1311,9 +1311,9 @@ Nasync.retry(3, apiMethod, function (err, result) {
 It can also be embeded within other control flow functions to retry individual methods that are not as reliable, like this:
 
 ```javascript
-Nasync.auto({
+Insync.auto({
     users: api.getUsers.bind(api),
-    payments: Nasync.retry(3, api.getPayments.bind(api))
+    payments: Insync.retry(3, api.getPayments.bind(api))
 }, function (err, results) {
 
     // Do something with the results
@@ -1327,7 +1327,7 @@ Nasync.auto({
 
 Creates an iterator function which calls the next function in the `tasks` array, returning a continuation to call the next one after that. It's also possible to "peek" at the next iterator with `iterator.next()`.
 
-This function is used internally by the nasync module, but can be useful when you want to manually control the flow of functions in series.
+This function is used internally by the insync module, but can be useful when you want to manually control the flow of functions in series.
 
 __Arguments__
 
@@ -1336,7 +1336,7 @@ __Arguments__
 __Example__
 
 ```javascript
-var iterator = Nasync.iterator([
+var iterator = Insync.iterator([
     function () { sys.p('one'); },
     function () { sys.p('two'); },
     function () { sys.p('three'); }
@@ -1373,15 +1373,15 @@ __Example__
 ```javascript
 // Using apply
 
-Nasync.parallel([
-    Nasync.apply(fs.writeFile, 'testfile1', 'test1'),
-    Nasync.apply(fs.writeFile, 'testfile2', 'test2'),
+Insync.parallel([
+    Insync.apply(fs.writeFile, 'testfile1', 'test1'),
+    Insync.apply(fs.writeFile, 'testfile2', 'test2'),
 ]);
 
 
 // The same process without using apply
 
-Nasync.parallel([
+Insync.parallel([
     function (callback) {
 
         fs.writeFile('testfile1', 'test1', callback);
@@ -1396,7 +1396,7 @@ Nasync.parallel([
 It's possible to pass any number of additional arguments when calling the continuation:
 
 ```javascript
-node> var fn = Nasync.apply(sys.puts, 'one');
+node> var fn = Insync.apply(sys.puts, 'one');
 node> fn('two', 'three');
 one
 two
@@ -1419,7 +1419,7 @@ __Example__
 ```javascript
 var call_order = [];
 
-Nasync.nextTick(function () {
+Insync.nextTick(function () {
 
     call_order.push('two');
     // call_order now equals ['one','two']
@@ -1450,7 +1450,7 @@ var createUser = function (id, callback) {
 };
 
 // Generate 5 users
-Nasync.times(5, function (n, next) {
+Insync.times(5, function (n, next) {
 
     createUser(n, function (err, user) {
 
@@ -1491,7 +1491,7 @@ var slow_fn = function (name, callback) {
     // Do something
     callback(null, result);
 };
-var fn = Nasync.memoize(slow_fn);
+var fn = Insync.memoize(slow_fn);
 
 // fn can now be used as if it were slow_fn
 fn('some name', function () {
@@ -1532,7 +1532,7 @@ var hello = function (name, callback) {
 ```
 
 ```javascript
-node> Nasync.log(hello, 'world');
+node> Insync.log(hello, 'world');
 'hello world'
 ```
 
@@ -1561,7 +1561,7 @@ var hello = function (name, callback) {
 ```
 
 ```javascript
-node> Nasync.dir(hello, 'world');
+node> Insync.dir(hello, 'world');
 {hello: 'world'}
 ```
 
@@ -1570,4 +1570,4 @@ node> Nasync.dir(hello, 'world');
 <a name="noConflict" />
 ### noConflict()
 
-Changes the value of `nasync` back to its original value, returning a reference to the `nasync` object.
+Changes the value of `insync` back to its original value, returning a reference to the `insync` object.

@@ -3,7 +3,7 @@
 var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
-var Nasync = require('../lib');
+var Insync = require('../lib');
 var Common = require('../lib/common');
 
 // Declare internals
@@ -79,7 +79,7 @@ var before = lab.before;
 var after = lab.after;
 var expect = Code.expect;
 
-describe('Nasync', function () {
+describe('Insync', function () {
 
     describe('Collection', function () {
 
@@ -89,7 +89,7 @@ describe('Nasync', function () {
 
                 var result = [];
 
-                Nasync.each([4, 3, 2, 1], internals.eachAsync(result), function (error) {
+                Insync.each([4, 3, 2, 1], internals.eachAsync(result), function (error) {
 
                     expect(error).to.not.exist();
                     expect(result).to.deep.equal([1, 2, 3, 4]);
@@ -108,12 +108,12 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.each([4], internals.doNothing);
+                Insync.each([4], internals.doNothing);
             });
 
             it('short circuits if the array is empty', function (done) {
 
-                Nasync.each([], Common.noop, function (error) {
+                Insync.each([], Common.noop, function (error) {
 
                     expect(error).to.not.exist();
                     done();
@@ -122,7 +122,7 @@ describe('Nasync', function () {
 
             it('sends an error when it occurs', function (done) {
 
-                Nasync.each([1], function (item, callback) {
+                Insync.each([1], function (item, callback) {
 
                     setTimeout(function() {
 
@@ -138,7 +138,7 @@ describe('Nasync', function () {
 
             it('is aliased as forEach()', function (done) {
 
-                expect(Nasync.each).to.equal(Nasync.forEach);
+                expect(Insync.each).to.equal(Insync.forEach);
                 done();
             });
         });
@@ -149,7 +149,7 @@ describe('Nasync', function () {
 
                 var result = [];
 
-                Nasync.eachSeries([1,3,2], internals.eachAsync(result), function (error) {
+                Insync.eachSeries([1,3,2], internals.eachAsync(result), function (error) {
 
                     expect(error).to.not.exist();
                     expect(result).to.deep.equal([1, 3, 2]);
@@ -168,12 +168,12 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.eachSeries([1], internals.doNothing);
+                Insync.eachSeries([1], internals.doNothing);
             });
 
             it('short circuits if the array is empty', function (done) {
 
-                Nasync.eachSeries([], Common.noop, function (error) {
+                Insync.eachSeries([], Common.noop, function (error) {
 
                     expect(error).to.not.exist();
                     done();
@@ -182,7 +182,7 @@ describe('Nasync', function () {
 
             it('sends an error when it occurs', function (done) {
 
-                Nasync.eachSeries([1], function (item, callback) {
+                Insync.eachSeries([1], function (item, callback) {
 
                     setTimeout(function() {
 
@@ -198,7 +198,7 @@ describe('Nasync', function () {
 
             it('is aliased as forEachSeries()', function (done) {
 
-                expect(Nasync.eachSeries).to.equal(Nasync.forEachSeries);
+                expect(Insync.eachSeries).to.equal(Insync.forEachSeries);
                 done();
             });
         });
@@ -210,7 +210,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.eachLimit(arr, 2, internals.eachAsync(result), function (err) {
+                Insync.eachLimit(arr, 2, internals.eachAsync(result), function (err) {
 
                     expect(err).to.not.exist();
                     expect(result).to.deep.equal(arr);
@@ -220,7 +220,7 @@ describe('Nasync', function () {
 
             it('does not call iterator if array is empty', function (done) {
 
-                Nasync.eachLimit([], 2, function (item, callback) {
+                Insync.eachLimit([], 2, function (item, callback) {
 
                     expect(true).to.equal(false);
                 }, function (err) {
@@ -232,7 +232,7 @@ describe('Nasync', function () {
 
             it('does not call iterator if limit is zero', function (done) {
 
-                Nasync.eachLimit([1, 2, 3], 0, function (item, callback) {
+                Insync.eachLimit([1, 2, 3], 0, function (item, callback) {
 
                     expect(true).to.equal(false);
                 }, function (err) {
@@ -247,7 +247,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.eachLimit(arr, 2, function (item, callback) {
+                Insync.eachLimit(arr, 2, function (item, callback) {
 
                     result.push(item);
 
@@ -275,12 +275,12 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.eachLimit([1, 2, 3, 4], 2, internals.doNothing);
+                Insync.eachLimit([1, 2, 3, 4], 2, internals.doNothing);
             });
 
             it('is aliased as forEachLimit()', function (done) {
 
-                expect(Nasync.eachLimit).to.equal(Nasync.forEachLimit);
+                expect(Insync.eachLimit).to.equal(Insync.forEachLimit);
                 done();
             });
         });
@@ -292,7 +292,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.map(arr, internals.mapAsync(result), function (err, mapped) {
+                Insync.map(arr, internals.mapAsync(result), function (err, mapped) {
 
                     expect(err).to.not.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
@@ -306,7 +306,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.map(arr, function (item, callback) {
+                Insync.map(arr, function (item, callback) {
 
                     result.push(item);
 
@@ -324,7 +324,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.map(arr, function (item, callback) {
+                Insync.map(arr, function (item, callback) {
 
                     result.push(item);
 
@@ -349,7 +349,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.mapSeries(arr, internals.mapAsync(result), function (err, mapped) {
+                Insync.mapSeries(arr, internals.mapAsync(result), function (err, mapped) {
 
                     expect(err).to.not.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
@@ -363,7 +363,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.mapSeries(arr, function (item, callback) {
+                Insync.mapSeries(arr, function (item, callback) {
 
                     result.push(item);
 
@@ -388,7 +388,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var result = [];
 
-                Nasync.mapLimit(arr, 2, internals.mapAsync(result), function (err, mapped) {
+                Insync.mapLimit(arr, 2, internals.mapAsync(result), function (err, mapped) {
 
                     expect(err).to.not.exist();
                     expect(result).to.deep.equal(mapped);
@@ -404,7 +404,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.filter(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.filter(arr, internals.filterAsync(callOrder), function (results) {
 
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(results).to.deep.equal([2, 3]);
@@ -414,7 +414,7 @@ describe('Nasync', function () {
 
             it('is aliased as select()', function (done) {
 
-                expect(Nasync.filter).to.equal(Nasync.select);
+                expect(Insync.filter).to.equal(Insync.select);
                 done();
             });
         });
@@ -426,7 +426,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.filterSeries(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.filterSeries(arr, internals.filterAsync(callOrder), function (results) {
 
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(callOrder).to.deep.equal(arr);
@@ -437,7 +437,7 @@ describe('Nasync', function () {
 
             it('is aliased as selectSeries()', function (done) {
 
-                expect(Nasync.filterSeries).to.equal(Nasync.selectSeries);
+                expect(Insync.filterSeries).to.equal(Insync.selectSeries);
                 done();
             });
         });
@@ -449,7 +449,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.reject(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.reject(arr, internals.filterAsync(callOrder), function (results) {
 
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(results).to.deep.equal([0, 1]);
@@ -465,7 +465,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.rejectSeries(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.rejectSeries(arr, internals.filterAsync(callOrder), function (results) {
 
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(callOrder).to.deep.equal(arr);
@@ -482,7 +482,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.reduce(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
+                Insync.reduce(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal(6);
@@ -494,7 +494,7 @@ describe('Nasync', function () {
 
             it('handles errors', function (done) {
 
-                Nasync.reduce([1, 2, 3], 0, function(a, x, callback) {
+                Insync.reduce([1, 2, 3], 0, function(a, x, callback) {
 
                     callback(new Error());
                 }, function(err) {
@@ -506,13 +506,13 @@ describe('Nasync', function () {
 
             it('is aliased as inject()', function (done) {
 
-                expect(Nasync.reduce).to.equal(Nasync.inject);
+                expect(Insync.reduce).to.equal(Insync.inject);
                 done();
             });
 
             it('is aliased as foldl()', function (done) {
 
-                expect(Nasync.reduce).to.equal(Nasync.foldl);
+                expect(Insync.reduce).to.equal(Insync.foldl);
                 done();
             });
         });
@@ -524,7 +524,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.reduceRight(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
+                Insync.reduceRight(arr, 0, internals.reduceAsync(callOrder), function (err, result) {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal(6);
@@ -536,7 +536,7 @@ describe('Nasync', function () {
 
             it('is aliased as foldr()', function (done) {
 
-                expect(Nasync.reduceRight).to.equal(Nasync.foldr);
+                expect(Insync.reduceRight).to.equal(Insync.foldr);
                 done();
             });
         });
@@ -548,7 +548,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.detect(arr, function (item, callback) {
+                Insync.detect(arr, function (item, callback) {
 
                     callOrder.push(item);
 
@@ -568,7 +568,7 @@ describe('Nasync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Nasync.detect(arr, function (item, callback) {
+                Insync.detect(arr, function (item, callback) {
 
                     callOrder.push(item);
 
@@ -590,7 +590,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.some(arr, function (item, callback) {
+                Insync.some(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -607,7 +607,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.some(arr, function (item, callback) {
+                Insync.some(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -622,7 +622,7 @@ describe('Nasync', function () {
 
             it('is aliased as any()', function (done) {
 
-                expect(Nasync.some).to.equal(Nasync.any);
+                expect(Insync.some).to.equal(Insync.any);
                 done();
             });
         });
@@ -633,7 +633,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.every(arr, function (item, callback) {
+                Insync.every(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -650,7 +650,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.every(arr, function (item, callback) {
+                Insync.every(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -667,7 +667,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.every([1, 2, 3], function(item, callback) {
+                Insync.every([1, 2, 3], function(item, callback) {
 
                     setTimeout(function () {
 
@@ -685,7 +685,7 @@ describe('Nasync', function () {
 
             it('is aliased as all()', function (done) {
 
-                expect(Nasync.every).to.equal(Nasync.all);
+                expect(Insync.every).to.equal(Insync.all);
                 done();
             });
         });
@@ -696,7 +696,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.concat(arr, function (item, callback) {
+                Insync.concat(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -716,7 +716,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.concat(arr, function (item, callback) {
+                Insync.concat(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -738,7 +738,7 @@ describe('Nasync', function () {
 
                 var arr = [0, 1, 2, 3];
 
-                Nasync.concatSeries(arr, function (item, callback) {
+                Insync.concatSeries(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -760,7 +760,7 @@ describe('Nasync', function () {
 
                 var arr = [3, 1, 0, 2, 0];
 
-                Nasync.sortBy(arr, function (item, callback) {
+                Insync.sortBy(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -779,7 +779,7 @@ describe('Nasync', function () {
 
                 var arr = [3, 1, 0, 2, 0];
 
-                Nasync.sortBy(arr, function (item, callback) {
+                Insync.sortBy(arr, function (item, callback) {
 
                     setTimeout(function () {
 
@@ -808,7 +808,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.series([
+                Insync.series([
                     function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 100) },
                     function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
                     function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
@@ -825,7 +825,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.series({
+                Insync.series({
                     zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 100) },
                     one: function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
                     two: function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
@@ -840,7 +840,7 @@ describe('Nasync', function () {
 
             it('handles empty array of functions', function (done) {
 
-                Nasync.series([], function (err, results) {
+                Insync.series([], function (err, results) {
 
                     expect(err).to.not.exist();
                     expect(results).to.deep.equal([]);
@@ -850,7 +850,7 @@ describe('Nasync', function () {
 
             it('handles array functions that call back with no arguments', function (done) {
 
-                Nasync.series([
+                Insync.series([
                     function (callback) { setTimeout(function () { callback(); }, 100) }
                 ], function (err, results) {
 
@@ -862,7 +862,7 @@ describe('Nasync', function () {
 
             it('handles object functions that call back with no arguments', function (done) {
 
-                Nasync.series({
+                Insync.series({
                     zero: function (callback) { setTimeout(function () { callback(); }, 100) }
                 }, function (err, results) {
 
@@ -874,7 +874,7 @@ describe('Nasync', function () {
 
             it('handles errors when an array is passed', function (done) {
 
-                Nasync.series([
+                Insync.series([
                     function (callback) { setTimeout(function () { callback(new Error('foo')); }, 100) }
                 ], function (err, results) {
 
@@ -885,7 +885,7 @@ describe('Nasync', function () {
 
             it('handles errors when an object is passed', function (done) {
 
-                Nasync.series({
+                Insync.series({
                     zero: function (callback) { setTimeout(function () { callback(new Error('foo')); }, 100) }
                 }, function (err, results) {
 
@@ -905,7 +905,7 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.series({
+                Insync.series({
                     zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) }
                 });
             });
@@ -917,7 +917,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.parallel([
+                Insync.parallel([
                     function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
                     function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
                     function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
@@ -934,7 +934,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.parallel({
+                Insync.parallel({
                     zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
                     one: function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
                     two: function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 10) },
@@ -958,7 +958,7 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.parallel({
+                Insync.parallel({
                     zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100) }
                 });
             });
@@ -971,7 +971,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.whilst(function () {
+                Insync.whilst(function () {
 
                     callOrder.push(['test', count]);
                     return count < 5;
@@ -1005,7 +1005,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.whilst(function () {
+                Insync.whilst(function () {
 
                     callOrder.push(['test', count]);
                     return count < 5;
@@ -1043,7 +1043,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doWhilst(function (callback) {
+                Insync.doWhilst(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1076,7 +1076,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doWhilst(function (callback) {
+                Insync.doWhilst(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1109,7 +1109,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doWhilst(function (callback) {
+                Insync.doWhilst(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1146,7 +1146,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.until(function () {
+                Insync.until(function () {
 
                     callOrder.push(['test', count]);
                     return count === 5;
@@ -1180,7 +1180,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.until(function () {
+                Insync.until(function () {
 
                     callOrder.push(['test', count]);
                     return count === 5;
@@ -1218,7 +1218,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doUntil(function (callback) {
+                Insync.doUntil(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1251,7 +1251,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doUntil(function (callback) {
+                Insync.doUntil(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1284,7 +1284,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var count = 0;
 
-                Nasync.doUntil(function (callback) {
+                Insync.doUntil(function (callback) {
 
                     callOrder.push(['iterator', count]);
 
@@ -1320,7 +1320,7 @@ describe('Nasync', function () {
 
                 var count = 0;
 
-                Nasync.forever(function (callback) {
+                Insync.forever(function (callback) {
 
                     setImmediate(function () {
 
@@ -1344,7 +1344,7 @@ describe('Nasync', function () {
 
                 expect(function () {
 
-                    Nasync.forever(function (callback) {
+                    Insync.forever(function (callback) {
 
                         callback(new Error('foo'));
                     });
@@ -1359,7 +1359,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.waterfall([
+                Insync.waterfall([
                     function (callback) {
 
                         setTimeout(function () {
@@ -1397,7 +1397,7 @@ describe('Nasync', function () {
 
             it('handles an empty array of tasks', function (done) {
 
-                Nasync.waterfall([], function (err) {
+                Insync.waterfall([], function (err) {
 
                     expect(err).to.not.exist();
                     done();
@@ -1415,12 +1415,12 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.waterfall([]);
+                Insync.waterfall([]);
             });
 
             it('errors if an array is not passed as first argument', function (done) {
 
-                Nasync.waterfall(null, function (err) {
+                Insync.waterfall(null, function (err) {
 
                     expect(err).to.exist();
                     expect(arguments.length).to.equal(1);
@@ -1432,7 +1432,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.waterfall([
+                Insync.waterfall([
                     function (callback) {
 
                         setTimeout(function () {
@@ -1467,7 +1467,7 @@ describe('Nasync', function () {
 
             it('executes a function a number of times', function (done) {
 
-                Nasync.times(5, function (n, callback) {
+                Insync.times(5, function (n, callback) {
 
                     setTimeout(function () { callback(null, n); }, 10);
                 }, function (err, results) {
@@ -1485,7 +1485,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.timesSeries(5, function (n, callback) {
+                Insync.timesSeries(5, function (n, callback) {
 
                     callOrder.push(n);
                     setTimeout(function () { callback(null, n); }, 100 - n * 10);
@@ -1503,7 +1503,7 @@ describe('Nasync', function () {
 
             it('creates a continuation function with applied arguments', function (done) {
 
-                var fn = Nasync.apply(function (num1, num2, callback) {
+                var fn = Insync.apply(function (num1, num2, callback) {
 
                     callback(null, num1 + num2);
                 }, 2, 3, function (err, sum) {
@@ -1553,7 +1553,7 @@ describe('Nasync', function () {
                     }, 150);
                 };
 
-                Nasync.applyEach([one, two, three], 5, function (err) {
+                Insync.applyEach([one, two, three], 5, function (err) {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal([2, 1, 3]);
@@ -1585,7 +1585,7 @@ describe('Nasync', function () {
                     }, 50);
                 };
 
-                Nasync.applyEach([one, two], function (err) {
+                Insync.applyEach([one, two], function (err) {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal([2, 1]);
@@ -1627,7 +1627,7 @@ describe('Nasync', function () {
                     }, 150);
                 };
 
-                var partial = Nasync.applyEach([one, two, three]);
+                var partial = Insync.applyEach([one, two, three]);
 
                 partial(5, function (err) {
 
@@ -1674,7 +1674,7 @@ describe('Nasync', function () {
                     }, 150);
                 };
 
-                Nasync.applyEachSeries([one, two, three], 5, function (err) {
+                Insync.applyEachSeries([one, two, three], 5, function (err) {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal([1, 2, 3]);
@@ -1689,7 +1689,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.parallelLimit([
+                Insync.parallelLimit([
                     function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 50) },
                     function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100) },
                     function (callback) { setTimeout(function () { callOrder.push(2); callback(null, 2, 3); }, 25) }
@@ -1734,7 +1734,7 @@ describe('Nasync', function () {
                     }, 100);
                 };
 
-                var add2mul3add1 = Nasync.compose(add1, mul3, add2);
+                var add2mul3add1 = Insync.compose(add1, mul3, add2);
 
                 add2mul3add1(3, function (err, result) {
 
@@ -1763,7 +1763,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var delays = [160, 80, 240, 80];
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -1802,7 +1802,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var delays = [160, 80, 240, 80];
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -1840,7 +1840,7 @@ describe('Nasync', function () {
 
                 var results = [];
 
-                var q = Nasync.queue(function (shouldError, callback) {
+                var q = Insync.queue(function (shouldError, callback) {
 
                     callback(shouldError ? new Error() : null);
                 }, 2);
@@ -1868,7 +1868,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
                 var delays = [40,20,60,20];
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -1908,7 +1908,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var delays = [160, 80, 240, 80];
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -1937,7 +1937,7 @@ describe('Nasync', function () {
             it('supports unshifting tasks', function (done) {
 
                 var queueOrder = [];
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     queueOrder.push(task);
                     callback();
@@ -1957,7 +1957,7 @@ describe('Nasync', function () {
 
             it('throws an error when executing callback too many times', function (done) {
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     callback();
                     expect(function() {
@@ -1975,7 +1975,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var delays = [160, 80, 240, 80];
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -2009,7 +2009,7 @@ describe('Nasync', function () {
 
             it('keeps track of idle state', function (done) {
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     expect(q.idle()).to.be.false();
                     callback();
@@ -2048,7 +2048,7 @@ describe('Nasync', function () {
                     };
                 }());
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     callOrder.push('process ' + task);
                     callOrder.push('timeout ' + elapsed());
@@ -2115,7 +2115,7 @@ describe('Nasync', function () {
                     };
                 }());
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     callOrder.push('process ' + task);
                     callOrder.push('timeout ' + elapsed());
@@ -2170,7 +2170,7 @@ describe('Nasync', function () {
                 var callbackCalled = false;
                 var drainCalled = false;
 
-                var q = Nasync.queue(function (task, callback) {
+                var q = Insync.queue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -2201,7 +2201,7 @@ describe('Nasync', function () {
 
                 var calls = [];
 
-                var q = Nasync.queue(function (task, cb) {
+                var q = Insync.queue(function (task, cb) {
 
                     expect(true).to.equal(false);
                 }, 3);
@@ -2218,7 +2218,7 @@ describe('Nasync', function () {
 
             it('maintains started property', function (done) {
 
-                var q = Nasync.queue(function(task, cb) {});
+                var q = Insync.queue(function(task, cb) {});
 
                 expect(q.started).to.equal(false);
                 q.push([]);
@@ -2233,7 +2233,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                var iterator = Nasync.iterator([
+                var iterator = Insync.iterator([
                     function () {
 
                         callOrder.push(1);
@@ -2267,7 +2267,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                var iterator = Nasync.iterator([
+                var iterator = Insync.iterator([
                     function () {
 
                         callOrder.push(1);
@@ -2296,7 +2296,7 @@ describe('Nasync', function () {
 
             it('handles an empty array', function (done) {
 
-                var iterator = Nasync.iterator([]);
+                var iterator = Insync.iterator([]);
 
                 expect(iterator()).to.not.exist();
                 expect(iterator.next()).to.not.exist();
@@ -2317,7 +2317,7 @@ describe('Nasync', function () {
                     callback(new Error(callCount), callCount);
                 };
 
-                Nasync.retry(times, fn, function (err, result) {
+                Insync.retry(times, fn, function (err, result) {
 
                     expect(callCount).to.equal(times);
                     expect(err).to.exist();
@@ -2344,7 +2344,7 @@ describe('Nasync', function () {
                     callback(new Error(callCount), callCount);
                 };
 
-                Nasync.retry(3, fn, function (err, result) {
+                Insync.retry(3, fn, function (err, result) {
 
                     expect(callCount).to.equal(2);
                     expect(err).to.not.exist();
@@ -2364,7 +2364,7 @@ describe('Nasync', function () {
                     callback(new Error(callCount), callCount);
                 };
 
-                Nasync.retry(fn, function (err, result) {
+                Insync.retry(fn, function (err, result) {
 
                     expect(callCount).to.equal(times);
                     expect(err).to.exist();
@@ -2385,7 +2385,7 @@ describe('Nasync', function () {
                     callback(new Error(callCount), callCount);
                 };
 
-                Nasync.retry(0, fn, function (err, result) {
+                Insync.retry(0, fn, function (err, result) {
 
                     expect(callCount).to.equal(times);
                     expect(err).to.exist();
@@ -2401,13 +2401,13 @@ describe('Nasync', function () {
                 var fooResults;
                 var retryResults;
     
-                Nasync.auto({
+                Insync.auto({
                     foo: function (callback, results) {
 
                         fooResults = results;
                         callback(null, 'FOO');
                     },
-                    retry: Nasync.retry(function (callback, results) {
+                    retry: Insync.retry(function (callback, results) {
 
                         retryResults = results;
                         callback(null, retryResult);
@@ -2429,7 +2429,7 @@ describe('Nasync', function () {
                 var callOrder = [];
                 var testdata = [{ test: 'test' }];
 
-                Nasync.auto({
+                Insync.auto({
                     task1: ['task2', function (callback) {
 
                         setTimeout(function () {
@@ -2489,7 +2489,7 @@ describe('Nasync', function () {
 
                 var callOrder = [];
 
-                Nasync.auto({
+                Insync.auto({
                     task1: ['task2', function (callback) {
 
                         setTimeout(function () {
@@ -2526,7 +2526,7 @@ describe('Nasync', function () {
 
             it('handles an empty object', function (done) {
 
-                Nasync.auto({}, function (err) {
+                Insync.auto({}, function (err) {
 
                     expect(err).to.not.exist();
                     done();
@@ -2544,7 +2544,7 @@ describe('Nasync', function () {
                     done();
                 };
 
-                Nasync.auto({
+                Insync.auto({
                     task1: function (callback) { callback(); },
                     task2: ['task1', function (callback) { callback(); }]
                 });
@@ -2552,7 +2552,7 @@ describe('Nasync', function () {
 
             it('handles errors from tasks', function (done) {
 
-                Nasync.auto({
+                Insync.auto({
                     task1: function (callback) {
 
                         callback(new Error(1));
@@ -2576,7 +2576,7 @@ describe('Nasync', function () {
 
             it('passes partial results on errors', function (done) {
 
-                Nasync.auto({
+                Insync.auto({
                     task1: function (callback) {
 
                         callback(null, 'result1');
@@ -2602,7 +2602,7 @@ describe('Nasync', function () {
 
             it('removeListener() has side effect on loop iterator', function (done) {
 
-                Nasync.auto({
+                Insync.auto({
                     task1: ['task3', function (callback) { done(); }],
                     task2: ['task3', function (callback) { /* by design: DON'T call callback */ }],
                     task3: function (callback) { callback(); }
@@ -2618,7 +2618,7 @@ describe('Nasync', function () {
 
                 // order of completion: 2, 1, 4, 3
 
-                var q = Nasync.priorityQueue(function (task, callback) {
+                var q = Insync.priorityQueue(function (task, callback) {
 
                     callOrder.push('task ' + task);
                     callback(new Error(task), task);
@@ -2686,7 +2686,7 @@ describe('Nasync', function () {
                 // worker2: -1---4
                 // order of completion: 1, 2, 3, 4
 
-                var q = Nasync.priorityQueue(function (task, callback) {
+                var q = Insync.priorityQueue(function (task, callback) {
 
                     setTimeout(function () {
 
@@ -2759,7 +2759,7 @@ describe('Nasync', function () {
                 // worker: --12--34--5-
                 // order of completion: 1, 2, 3, 4, 5
 
-                var c = Nasync.cargo(function (tasks, callback) {
+                var c = Insync.cargo(function (tasks, callback) {
 
                     setTimeout(function () {
 
@@ -2854,7 +2854,7 @@ describe('Nasync', function () {
                     callback(null, arg1 + arg2);
                 };
 
-                var memoized = Nasync.memoize(fn);
+                var memoized = Insync.memoize(fn);
 
                 memoized(1, 2, function (err, result) {
 
@@ -2881,7 +2881,7 @@ describe('Nasync', function () {
                     callback(null, arg1 + arg2);
                 };
 
-                var memoized = Nasync.memoize(fn, function (item) {
+                var memoized = Insync.memoize(fn, function (item) {
 
                     return 'foo';
                 });
@@ -2922,7 +2922,7 @@ describe('Nasync', function () {
                     }
                 };
 
-                var memoized = Nasync.memoize(fn);
+                var memoized = Insync.memoize(fn);
 
                 memoized(1, 2, cb);
                 memoized(1, 2, cb);
@@ -2935,7 +2935,7 @@ describe('Nasync', function () {
                     callback(new Error('should not be called'));
                 };
 
-                var memoized = Nasync.memoize(fn);
+                var memoized = Insync.memoize(fn);
 
                 memoized.memo.foo = [null, 'bar'];
                 memoized('foo', function (err, value) {
@@ -2964,8 +2964,8 @@ describe('Nasync', function () {
                     callback(null, arg1 + arg2);
                 };
 
-                var memoized = Nasync.memoize(fn);
-                var unmemoized = Nasync.unmemoize(memoized);
+                var memoized = Insync.memoize(fn);
+                var unmemoized = Insync.unmemoize(memoized);
 
                 unmemoized(1, 2, function (err, result) {
 
@@ -2995,7 +2995,7 @@ describe('Nasync', function () {
                     callback(null, arg1 + arg2);
                 };
 
-                var unmemoized = Nasync.unmemoize(fn);
+                var unmemoized = Insync.unmemoize(fn);
 
                 fn(1, 2, function (err, sum1) {
 
@@ -3030,7 +3030,7 @@ describe('Nasync', function () {
                     });
                 };
 
-                Nasync.log(fn);
+                Insync.log(fn);
             });
 
             it('handles additional arguments after the function', function (done) {
@@ -3053,7 +3053,7 @@ describe('Nasync', function () {
                     });
                 };
 
-                Nasync.log(fn, 'bar', 'baz');
+                Insync.log(fn, 'bar', 'baz');
             });
 
             it('handles errors returned by the asynchronous function', function (done) {
@@ -3076,7 +3076,7 @@ describe('Nasync', function () {
                     });
                 };
 
-                Nasync.log(fn);
+                Insync.log(fn);
             });
 
             it('does not error if console.log() has been removed', function (done) {
@@ -3116,13 +3116,13 @@ describe('Nasync', function () {
                     });
                 };
 
-                Nasync.log(fn);
+                Insync.log(fn);
             });
         });
 
         describe('#dir', function () {
 
-            // Theses tests would just be a duplicate of Nasync.log.
+            // Theses tests would just be a duplicate of Insync.log.
             // Including a single test for completeness.
 
             it('displays the results of a function', function (done) {
@@ -3145,15 +3145,15 @@ describe('Nasync', function () {
                     });
                 };
 
-                Nasync.dir(fn);
+                Insync.dir(fn);
             });
         });
 
         describe('#noConflict', function () {
 
-            it('returns a reference to the original Nasync', function (done) {
+            it('returns a reference to the original Insync', function (done) {
 
-                expect(Nasync.noConflict()).to.equal(Nasync);
+                expect(Insync.noConflict()).to.equal(Insync);
                 done();
             });
         });
