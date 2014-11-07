@@ -492,6 +492,18 @@ describe('Nasync', function () {
                 });
             });
 
+            it('handles errors', function (done) {
+
+                Nasync.reduce([1, 2, 3], 0, function(a, x, callback) {
+
+                    callback(new Error());
+                }, function(err) {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+
             it('is aliased as inject()', function (done) {
 
                 expect(Nasync.reduce).to.equal(Nasync.inject);
@@ -647,6 +659,26 @@ describe('Nasync', function () {
                 }, function (result) {
 
                     expect(result).to.equal(false);
+                    done();
+                });
+            });
+
+            it('returns early on failure', function (done) {
+
+                var callOrder = [];
+
+                Nasync.every([1, 2, 3], function(item, callback) {
+
+                    setTimeout(function () {
+
+                        callOrder.push(item);
+                        callback(item === 1);
+                    }, item * 25);
+                }, function (result) {
+
+                    expect(result).to.equal(false);
+                    expect(callOrder).to.deep.equal([1, 2]);
+                    // note that 3 is still executed
                     done();
                 });
             });
@@ -1528,6 +1560,82 @@ describe('Nasync', function () {
                     done();
                 });
             });
+
+            it('works when no arguments are applied', function (done) {
+
+                var callOrder = [];
+
+                var one = function (callback) {
+
+                    expect(arguments.length).to.equal(1);
+                    setTimeout(function () {
+
+                        callOrder.push(1);
+                        callback();
+                    }, 100);
+                };
+
+                var two = function (callback) {
+
+                    expect(arguments.length).to.equal(1);
+                    setTimeout(function () {
+
+                        callOrder.push(2);
+                        callback();
+                    }, 50);
+                };
+
+                Nasync.applyEach([one, two], function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 1]);
+                    done();
+                });
+            });
+
+            it('supports partial application', function (done) {
+
+                var callOrder = [];
+
+                var one = function (val, cb) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(1);
+                        cb(null, 1);
+                    }, 100);
+                };
+
+                var two = function (val, cb) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(2);
+                        cb(null, 2);
+                    }, 50);
+                };
+
+                var three = function (val, cb) {
+
+                    expect(val).to.equal(5);
+                    setTimeout(function () {
+
+                        callOrder.push(3);
+                        cb(null, 3);
+                    }, 150);
+                };
+
+                var partial = Nasync.applyEach([one, two, three]);
+
+                partial(5, function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 1, 3]);
+                    done();
+                });
+            });
         });
 
         describe('#applyEachSeries', function () {
@@ -2088,6 +2196,35 @@ describe('Nasync', function () {
                     done();
                 }, 600)
             });
+
+            it('calls drain when empty task array is added to empty queue', function (done) {
+
+                var calls = [];
+
+                var q = Nasync.queue(function (task, cb) {
+
+                    expect(true).to.equal(false);
+                }, 3);
+
+                q.drain = function () {
+
+                    expect(q.length()).to.equal(0);
+                    expect(q.running()).to.equal(0);
+                    done();
+                };
+
+                q.push([]);
+            });
+
+            it('maintains started property', function (done) {
+
+                var q = Nasync.queue(function(task, cb) {});
+
+                expect(q.started).to.equal(false);
+                q.push([]);
+                expect(q.started).to.equal(true);
+                done();
+            });
         });
 
         describe('#iterator', function () {
@@ -2470,6 +2607,235 @@ describe('Nasync', function () {
                     task2: ['task3', function (callback) { /* by design: DON'T call callback */ }],
                     task3: function (callback) { callback(); }
                 });
+            });
+        });
+
+        describe('#priorityQueue', function () {
+
+            it('completes tasks in priority order', function (done) {
+
+                var callOrder = [];
+
+                // order of completion: 2, 1, 4, 3
+
+                var q = Nasync.priorityQueue(function (task, callback) {
+
+                    callOrder.push('task ' + task);
+                    callback(new Error(task), task);
+                }, 1);
+
+                q.push(1, 1.4, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1');
+                    expect(arg).to.equal(1);
+                    expect(q.length()).to.equal(2);
+                    callOrder.push('callback ' + 1);
+                });
+
+                q.push(2, 0.2, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('2');
+                    expect(arg).to.equal(2);
+                    expect(q.length()).to.equal(3);
+                    callOrder.push('callback ' + 2);
+                });
+
+                q.push(3, 3.8, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('3');
+                    expect(arg).to.equal(3);
+                    expect(q.length()).to.equal(0);
+                    callOrder.push('callback ' + 3);
+                });
+
+                q.push(4, 2.9, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('4');
+                    expect(arg).to.equal(4);
+                    expect(q.length()).to.equal(1);
+                    callOrder.push('callback ' + 4);
+                });
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(1);
+
+                q.drain = function () {
+
+                    expect(callOrder).to.deep.equal([
+                        'task 2', 'callback 2',
+                        'task 1', 'callback 1',
+                        'task 4', 'callback 4',
+                        'task 3', 'callback 3'
+                    ]);
+                    expect(q.concurrency).to.equal(1);
+                    expect(q.length()).to.equal(0);
+                    done();
+                };
+            });
+
+            it('supports concurrency', function (done) {
+
+                var callOrder = [];
+                var delays = [160, 80, 240, 80];
+
+                // worker1: --2-3
+                // worker2: -1---4
+                // order of completion: 1, 2, 3, 4
+
+                var q = Nasync.priorityQueue(function (task, callback) {
+
+                    setTimeout(function () {
+
+                        callOrder.push('task ' + task);
+                        callback(new Error(task), task);
+                    }, delays.splice(0, 1)[0]);
+                }, 2);
+
+                q.push(1, 1.4, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1');
+                    expect(arg).to.equal(1);
+                    expect(q.length()).to.equal(2);
+                    callOrder.push('callback ' + 1);
+                });
+
+                q.push(2, 0.2, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('2');
+                    expect(arg).to.equal(2);
+                    expect(q.length()).to.equal(1);
+                    callOrder.push('callback ' + 2);
+                });
+
+                q.push(3, 3.8, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('3');
+                    expect(arg).to.equal(3);
+                    expect(q.length()).to.equal(0);
+                    callOrder.push('callback ' + 3);
+                });
+
+                q.push(4, 2.9, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('4');
+                    expect(arg).to.equal(4);
+                    expect(q.length()).to.equal(0);
+                    callOrder.push('callback ' + 4);
+                });
+
+                expect(q.length()).to.equal(4);
+                expect(q.concurrency).to.equal(2);
+
+                q.drain = function () {
+
+                    expect(callOrder).to.deep.equal([
+                        'task 1', 'callback 1',
+                        'task 2', 'callback 2',
+                        'task 3', 'callback 3',
+                        'task 4', 'callback 4'
+                    ]);
+                    expect(q.concurrency).to.equal(2);
+                    expect(q.length()).to.equal(0);
+                    done();
+                };
+            });
+        });
+
+        describe('#cargo', function () {
+
+            it('supports default behavior', function (done) {
+
+                var callOrder = [];
+                var delays = [160, 160, 80];
+
+                // worker: --12--34--5-
+                // order of completion: 1, 2, 3, 4, 5
+
+                var c = Nasync.cargo(function (tasks, callback) {
+
+                    setTimeout(function () {
+
+                        var task = tasks.join(' ');
+
+                        callOrder.push('task ' + task);
+                        callback(new Error(task), task);
+                    }, delays.shift());
+                }, 2);
+
+                c.push(1, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1 2');
+                    expect(arg).to.equal('1 2');
+                    expect(c.length()).to.equal(3);
+                    callOrder.push('callback ' + 1);
+                });
+
+                c.push(2, function (err, arg) {
+
+                    expect(err).to.exist();
+                    expect(err.message).to.equal('1 2');
+                    expect(arg).to.equal('1 2');
+                    expect(c.length()).to.equal(3);
+                    callOrder.push('callback ' + 2);
+                });
+
+                expect(c.length()).to.equal(2);
+
+                // async push
+                setTimeout(function () {
+
+                    c.push(3, function (err, arg) {
+
+                        expect(err).to.exist();
+                        expect(err.message).to.equal('3 4');
+                        expect(arg).to.equal('3 4');
+                        expect(c.length()).to.equal(1);
+                        callOrder.push('callback ' + 3);
+                    });
+                }, 60);
+
+                setTimeout(function () {
+
+                    c.push(4, function (err, arg) {
+
+                        expect(err).to.exist();
+                        expect(err.message).to.equal('3 4');
+                        expect(arg).to.equal('3 4');
+                        expect(c.length()).to.equal(1);
+                        callOrder.push('callback ' + 4);
+                    });
+
+                    expect(c.length()).to.equal(2);
+
+                    c.push(5, function (err, arg) {
+
+                        expect(err).to.exist();
+                        expect(err.message).to.equal('5');
+                        expect(arg).to.equal('5');
+                        expect(c.length()).to.equal(0);
+                        callOrder.push('callback ' + 5);
+                    });
+                }, 120);
+
+                setTimeout(function () {
+
+                    expect(callOrder).to.deep.equal([
+                        'task 1 2', 'callback 1', 'callback 2',
+                        'task 3 4', 'callback 3', 'callback 4',
+                        'task 5'  , 'callback 5'
+                    ]);
+                    expect(c.length()).to.equal(0);
+                    done();
+                }, 800);
             });
         });
     });
