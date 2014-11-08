@@ -2076,10 +2076,18 @@ describe('Insync', function () {
 
                     q.pause();
                     expect(q.paused).to.be.true();
+
+                    // Call pause() when already paused
+                    q.pause();
+                    expect(q.paused).to.be.true();
                 }, pauseTimeout);
 
                 setTimeout(function () {
 
+                    q.resume();
+                    expect(q.paused).to.be.false();
+
+                    // Call resume() when not paused
                     q.resume();
                     expect(q.paused).to.be.false();
                 }, resumeTimeout);
@@ -2224,6 +2232,60 @@ describe('Insync', function () {
                 q.push([]);
                 expect(q.started).to.equal(true);
                 done();
+            });
+
+            it('supports saturated, empty, and drain events', function (done) {
+
+                var calls = [];
+
+                var q = Insync.queue(function (task, cb) {
+
+                    calls.push(task);
+                    setImmediate(cb);
+                }, 10);
+
+                q.concurrency = 3;
+
+                q.saturated = function () {
+
+                    expect(q.length()).to.equal(3);
+                    calls.push('saturated');
+                };
+
+                q.empty = function () {
+
+                    expect(q.length()).to.equal(0);
+                    calls.push('empty');
+                };
+
+                q.drain = function () {
+
+                    expect(q.length()).to.equal(0);
+                    expect(q.running()).to.equal(0);
+                    calls.push('drain');
+                    expect(calls).to.deep.equal([
+                        'saturated',
+                        '1',
+                        '2',
+                        '3',
+                        '1 cb',
+                        '4',
+                        '2 cb',
+                        'empty',
+                        '5',
+                        '3 cb',
+                        '4 cb',
+                        '5 cb',
+                        'drain'
+                    ]);
+                    done();
+                };
+
+                q.push('1', function () { calls.push('1 cb'); });
+                q.push('2', function () { calls.push('2 cb'); });
+                q.push('3', function () { calls.push('3 cb'); });
+                q.push('4', function () { calls.push('4 cb'); });
+                q.push('5', function () { calls.push('5 cb'); });
             });
         });
 
@@ -2616,7 +2678,7 @@ describe('Insync', function () {
 
                 var callOrder = [];
 
-                // order of completion: 2, 1, 4, 3
+                // Order of completion: 2, 1, 4, 5, 3
 
                 var q = Insync.priorityQueue(function (task, callback) {
 
@@ -2629,8 +2691,8 @@ describe('Insync', function () {
                     expect(err).to.exist();
                     expect(err.message).to.equal('1');
                     expect(arg).to.equal(1);
-                    expect(q.length()).to.equal(2);
-                    callOrder.push('callback ' + 1);
+                    expect(q.length()).to.equal(3);
+                    callOrder.push('callback 1');
                 });
 
                 q.push(2, 0.2, function (err, arg) {
@@ -2638,8 +2700,8 @@ describe('Insync', function () {
                     expect(err).to.exist();
                     expect(err.message).to.equal('2');
                     expect(arg).to.equal(2);
-                    expect(q.length()).to.equal(3);
-                    callOrder.push('callback ' + 2);
+                    expect(q.length()).to.equal(4);
+                    callOrder.push('callback 2');
                 });
 
                 q.push(3, 3.8, function (err, arg) {
@@ -2648,19 +2710,28 @@ describe('Insync', function () {
                     expect(err.message).to.equal('3');
                     expect(arg).to.equal(3);
                     expect(q.length()).to.equal(0);
-                    callOrder.push('callback ' + 3);
+                    callOrder.push('callback 3');
                 });
 
-                q.push(4, 2.9, function (err, arg) {
+                q.push([4, 5], 2.9, function (err, arg) {
 
                     expect(err).to.exist();
-                    expect(err.message).to.equal('4');
-                    expect(arg).to.equal(4);
-                    expect(q.length()).to.equal(1);
-                    callOrder.push('callback ' + 4);
+
+                    if (arg === 4) {
+                        expect(err.message).to.equal('4');
+                        expect(q.length()).to.equal(2);
+                        return callOrder.push('callback 4');
+                    }
+                    else if (arg === 5) {
+                        expect(err.message).to.equal('5');
+                        expect(q.length()).to.equal(1);
+                        return callOrder.push('callback 5');
+                    }
+
+                    expect(true).to.be.false();
                 });
 
-                expect(q.length()).to.equal(4);
+                expect(q.length()).to.equal(5);
                 expect(q.concurrency).to.equal(1);
 
                 q.drain = function () {
@@ -2669,6 +2740,7 @@ describe('Insync', function () {
                         'task 2', 'callback 2',
                         'task 1', 'callback 1',
                         'task 4', 'callback 4',
+                        'task 5', 'callback 5',
                         'task 3', 'callback 3'
                     ]);
                     expect(q.concurrency).to.equal(1);
@@ -2684,7 +2756,7 @@ describe('Insync', function () {
 
                 // worker1: --2-3
                 // worker2: -1---4
-                // order of completion: 1, 2, 3, 4
+                // Order of completion: 1, 2, 3, 4
 
                 var q = Insync.priorityQueue(function (task, callback) {
 
@@ -2747,6 +2819,29 @@ describe('Insync', function () {
                     done();
                 };
             });
+
+            it('calls drain() when empty data is inserted in empty queue', function (done) {
+
+                var q = Insync.priorityQueue(function (task, callback) {
+
+                    expect(true).to.be.false();
+                }, 1);
+
+                q.drain = function () {
+
+                    expect(q.concurrency).to.equal(1);
+                    expect(q.length()).to.equal(0);
+                    done();
+                };
+
+                q.push([], 1.0, function (err, arg) {
+
+                    expect(true).to.be.false();
+                });
+
+                expect(q.length()).to.equal(0);
+                expect(q.concurrency).to.equal(1);
+            });
         });
 
         describe('#cargo', function () {
@@ -2756,8 +2851,8 @@ describe('Insync', function () {
                 var callOrder = [];
                 var delays = [160, 160, 80];
 
-                // worker: --12--34--5-
-                // order of completion: 1, 2, 3, 4, 5
+                // Worker: --12--34--5-
+                // Order of completion: 1, 2, 3, 4, 5
 
                 var c = Insync.cargo(function (tasks, callback) {
 
@@ -2775,8 +2870,8 @@ describe('Insync', function () {
                     expect(err).to.exist();
                     expect(err.message).to.equal('1 2');
                     expect(arg).to.equal('1 2');
-                    expect(c.length()).to.equal(3);
-                    callOrder.push('callback ' + 1);
+                    expect(c.length()).to.equal(4);
+                    callOrder.push('callback 1');
                 });
 
                 c.push(2, function (err, arg) {
@@ -2784,8 +2879,8 @@ describe('Insync', function () {
                     expect(err).to.exist();
                     expect(err.message).to.equal('1 2');
                     expect(arg).to.equal('1 2');
-                    expect(c.length()).to.equal(3);
-                    callOrder.push('callback ' + 2);
+                    expect(c.length()).to.equal(4);
+                    callOrder.push('callback 2');
                 });
 
                 expect(c.length()).to.equal(2);
@@ -2798,8 +2893,8 @@ describe('Insync', function () {
                         expect(err).to.exist();
                         expect(err.message).to.equal('3 4');
                         expect(arg).to.equal('3 4');
-                        expect(c.length()).to.equal(1);
-                        callOrder.push('callback ' + 3);
+                        expect(c.length()).to.equal(2);
+                        callOrder.push('callback 3');
                     });
                 }, 60);
 
@@ -2810,19 +2905,21 @@ describe('Insync', function () {
                         expect(err).to.exist();
                         expect(err.message).to.equal('3 4');
                         expect(arg).to.equal('3 4');
-                        expect(c.length()).to.equal(1);
-                        callOrder.push('callback ' + 4);
+                        expect(c.length()).to.equal(2);
+                        callOrder.push('callback 4');
                     });
 
                     expect(c.length()).to.equal(2);
 
-                    c.push(5, function (err, arg) {
+                    var c5 = true;
+
+                    c.push([5, 6], function (err, arg) {
 
                         expect(err).to.exist();
-                        expect(err.message).to.equal('5');
-                        expect(arg).to.equal('5');
+                        expect(err.message).to.equal('5 6');
+                        expect(arg).to.equal('5 6');
                         expect(c.length()).to.equal(0);
-                        callOrder.push('callback ' + 5);
+                        callOrder.push('callback 5 6');
                     });
                 }, 120);
 
@@ -2831,11 +2928,60 @@ describe('Insync', function () {
                     expect(callOrder).to.deep.equal([
                         'task 1 2', 'callback 1', 'callback 2',
                         'task 3 4', 'callback 3', 'callback 4',
-                        'task 5'  , 'callback 5'
+                        'task 5 6', 'callback 5 6', 'callback 5 6'
                     ]);
                     expect(c.length()).to.equal(0);
                     done();
                 }, 800);
+            });
+
+            it('drains once', function (done) {
+
+                var c = Insync.cargo(function (tasks, callback) {
+
+                    callback();
+                }, 3);
+
+                var drainCounter = 0;
+
+                c.drain = function () { drainCounter++; };
+
+                for (var i = 0; i < 10; ++i) {
+                    c.push(i);
+                }
+
+                setTimeout(function () {
+
+                    expect(drainCounter).to.equal(1);
+                    done();
+                }, 100);
+            });
+
+            it('drains twice', function (done) {
+
+                var c = Insync.cargo(function (tasks, callback) {
+
+                    callback();
+                }, 3);
+
+                var loadCargo = function () {
+
+                    for (var i = 0; i < 10; ++i) {
+                        c.push(i);
+                    }
+                };
+
+                var drainCounter = 0;
+
+                c.drain = function () { drainCounter++; };
+
+                loadCargo();
+                setTimeout(loadCargo, 200);
+                setTimeout(function () {
+
+                    expect(drainCounter).to.equal(2);
+                    done();
+                }, 400);
             });
         });
     });
