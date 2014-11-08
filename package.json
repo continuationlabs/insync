@@ -3,7 +3,7 @@
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "main": "index",
   "author": "Colin Ihrig <cjihrig@gmail.com> (http://www.cjihrig.com/)",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/cjihrig/insync",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
     "code": "1.x.x"
   },
   "scripts": {
-    "test": "node node_modules/lab/bin/lab -v -L -t 99"
+    "test": "node node_modules/lab/bin/lab -v -L -t 100"
   },
   "keywords": [
     "async",
