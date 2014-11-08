@@ -2762,7 +2762,6 @@ describe('Insync', function () {
             it('determines the best order to run tasks', function (done) {
 
                 var callOrder = [];
-                var testdata = [{ test: 'test' }];
 
                 Insync.auto({
                     task1: ['task2', function (callback) {
