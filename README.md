@@ -5,11 +5,20 @@
 ![Dependencies](http://img.shields.io/david/cjihrig/insync.svg)
 ![devDependencies](http://img.shields.io/david/dev/cjihrig/insync.svg)
 
-Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async is the goal for version 1.0.0.
+Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async was the goal for version 1.0.0.
 
 insync is a utility module which provides straight-forward, powerful functions for working with asynchronous JavaScript. Unlike async, insync is not intended to work in any environment other than Node.js. However, because insync does not have any dependencies, it should be trivial to use with Browserify. Of course, you could use async too.
 
 insync provides around 20 functions that include the usual 'functional' suspects (`map`, `reduce`, `filter`, `each`, etc.) as well as some common patterns for asynchronous control flow (`parallel`, `series`, `waterfall`, etc.). All these functions assume you follow the Node.js convention of providing a single callback as the last argument of your asynchronous function.
+
+## Why Fork async?
+
+async is a fantastic module, one of the most popular on npm. So why fork it? The first reason was for a fun side project, but there is more to it:
+
+- At the time of writing (Nov 8, 2014), there are 62 open issues and 46 open pull requests, while the last commit to the repo occurred on May 27, 2014.
+- Despite it's widespread use, async is only at version 0.9.0. While not a huge deal, the majority of the npm ecosystem follows semantic versioning, making 1.0.0 is a big deal to some people.
+- Due to its support for browser environments, async has a decent amount of overhead in the code. Examples of this include checks for the existence of array extras such as `map()` and `forEach()` and shims for `setImmediate()` and `nextTick()`. Because insync is focused solely on node.js, these things are known to exist.
+- Related to the previous point - because insync targets node, code can be optimized for v8. This is a work in progress.
 
 ## Quick Examples
 
