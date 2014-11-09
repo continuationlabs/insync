@@ -15,7 +15,7 @@ insync provides around 20 functions that include the usual 'functional' suspects
 
 async is a fantastic module, one of the most popular on npm. So why fork it? The first reason was for a fun side project, but there is more to it:
 
-- At the time of writing (Nov 8, 2014), there are 62 open issues and 46 open pull requests, while the last commit to the repo occurred on May 27, 2014.
+- At the time of writing (Nov 8, 2014), there are 62 open issues and 46 open pull requests, while the last commit to the repo occurred on May 27, 2014. The goal is for insync to grow an active community.
 - Despite it's widespread use, async is only at version 0.9.0. While not a huge deal, the majority of the npm ecosystem follows semantic versioning, making 1.0.0 is a big deal to some people.
 - Due to its support for browser environments, async has a decent amount of overhead in the code. Examples of this include checks for the existence of array extras such as `map()` and `forEach()` and shims for `setImmediate()` and `nextTick()`. Because insync is focused solely on node.js, these things are known to exist.
 - Related to the previous point - because insync targets node, code can be optimized for v8. This is a work in progress.
