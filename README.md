@@ -20,6 +20,10 @@ async is a fantastic module, one of the most popular on npm. So why fork it? The
 - Due to its support for browser environments, async has a decent amount of overhead in the code. Examples of this include checks for the existence of array extras such as `map()` and `forEach()` and shims for `setImmediate()` and `nextTick()`. Because insync is focused solely on node.js, these things are known to exist.
 - Related to the previous point - because insync targets node, code can be optimized for v8. This is a work in progress.
 
+## Contributing
+
+insync follows the [hapijs style guide](https://github.com/hapijs/hapi/blob/master/docs/Style.md). Contributions must also adhere to the style guide. [lab](https://github.com/hapijs/lab) framework is used to run tests (via `npm test`), lint the code, and enforce code coverage. Contributions must pass linting and maintain 100% code coverage. If a contribution is a bug fix, at least one test should be added to prevent regressions.
+
 ## Quick Examples
 
 ```javascript
