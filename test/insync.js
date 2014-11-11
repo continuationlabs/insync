@@ -84,7 +84,7 @@ describe('Insync', function () {
 
     describe('Collection', function () {
 
-        describe('#each', function () {
+        describe('each()', function () {
 
             it('iterates over a collection of items in parallel', function (done) {
 
@@ -144,7 +144,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#eachSeries', function () {
+        describe('eachSeries()', function () {
 
             it('iterates over a collection of items in series', function (done) {
 
@@ -204,7 +204,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#eachLimit', function () {
+        describe('eachLimit()', function () {
 
             it('iterates over a collection with a limit', function (done) {
 
@@ -286,7 +286,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#map', function () {
+        describe('map()', function () {
 
             it('creates a mapped version of input', function (done) {
 
@@ -343,7 +343,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#mapSeries', function () {
+        describe('mapSeries()', function () {
 
             it('creates a mapped version of input', function (done) {
 
@@ -382,7 +382,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#mapLimit', function () {
+        describe('mapLimit()', function () {
 
             it('iterates over a collection with a limit', function (done) {
 
@@ -398,7 +398,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#filter', function () {
+        describe('filter()', function () {
 
             it('filters an array', function (done) {
 
@@ -420,7 +420,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#filterSeries', function () {
+        describe('filterSeries()', function () {
 
             it('filters an array in series', function (done) {
 
@@ -443,7 +443,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#reject', function () {
+        describe('reject()', function () {
 
             it('filters an array', function (done) {
 
@@ -459,7 +459,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#rejectSeries', function () {
+        describe('rejectSeries()', function () {
 
             it('filters an array in series', function (done) {
 
@@ -476,7 +476,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#reduce', function () {
+        describe('reduce()', function () {
 
             it('reduces an array', function (done) {
 
@@ -518,7 +518,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#reduceRight', function () {
+        describe('reduceRight()', function () {
 
             it('reduces an array', function (done) {
 
@@ -542,7 +542,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#detect', function () {
+        describe('detect()', function () {
 
             it('returns the first value that passes test', function (done) {
 
@@ -585,7 +585,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#detectSeries', function () {
+        describe('detectSeries()', function () {
 
             it('detects in series', function (done) {
 
@@ -607,7 +607,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#some', function () {
+        describe('some()', function () {
 
             it('returns true if at least one element satisfies test', function (done) {
 
@@ -670,7 +670,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#every', function () {
+        describe('every()', function () {
 
             it('returns true if every element satisfies test', function (done) {
 
@@ -733,7 +733,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#concat', function () {
+        describe('concat()', function () {
 
             it('concatenates results', function (done) {
 
@@ -775,7 +775,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#concatSeries', function () {
+        describe('concatSeries()', function () {
 
             it('concatenates results in series', function (done) {
 
@@ -797,7 +797,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#sortBy', function () {
+        describe('sortBy()', function () {
 
             it('performs an asynchronous sort', function (done) {
 
@@ -845,7 +845,7 @@ describe('Insync', function () {
 
     describe('Flow', function () {
 
-        describe('#series', function () {
+        describe('series()', function () {
 
             it('executes array of functions in series', function (done) {
 
@@ -954,7 +954,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#parallel', function () {
+        describe('parallel()', function () {
 
             it('executes array of functions in parallel', function (done) {
 
@@ -1007,7 +1007,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#whilst', function () {
+        describe('whilst()', function () {
 
             it('executes an asynchronous while loop', function (done) {
 
@@ -1079,7 +1079,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#doWhilst', function () {
+        describe('doWhilst()', function () {
 
             it('executes an asynchronous do...while loop', function (done) {
 
@@ -1182,7 +1182,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#until', function () {
+        describe('until()', function () {
 
             it('executes an asynchronous until loop', function (done) {
 
@@ -1254,7 +1254,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#doUntil', function () {
+        describe('doUntil()', function () {
 
             it('executes an asynchronous do...until loop', function (done) {
 
@@ -1357,7 +1357,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#forever', function () {
+        describe('forever()', function () {
 
             it('runs an infinite loop', function (done) {
 
@@ -1396,7 +1396,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#waterfall', function () {
+        describe('waterfall()', function () {
 
             it('runs tasks in a waterfall', function (done) {
 
@@ -1506,7 +1506,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#times', function () {
+        describe('times()', function () {
 
             it('executes a function a number of times', function (done) {
 
@@ -1522,7 +1522,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#timesSeries', function () {
+        describe('timesSeries()', function () {
 
             it('executes a function a number of times in series', function (done) {
 
@@ -1542,7 +1542,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#apply', function () {
+        describe('apply()', function () {
 
             it('creates a continuation function with applied arguments', function (done) {
 
@@ -1577,7 +1577,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#applyEach', function () {
+        describe('applyEach()', function () {
 
             it('applies the supplied arguments to each function in the list', function (done) {
 
@@ -1698,7 +1698,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#applyEachSeries', function () {
+        describe('applyEachSeries()', function () {
 
             it('applies the supplied arguments to each function in the list in order', function (done) {
 
@@ -1743,7 +1743,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#parallelLimit', function () {
+        describe('parallelLimit()', function () {
 
             it('executes array of functions in parallel with a limit', function (done) {
 
@@ -1802,7 +1802,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#seq', function () {
+        describe('seq()', function () {
 
             it('normal behavior', function (done) {
 
@@ -1911,7 +1911,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#compose', function () {
+        describe('compose()', function () {
 
             it('creates a function which is a composition of the passed asynchronous functions', function (done) {
 
@@ -2020,7 +2020,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#queue', function () {
+        describe('queue()', function () {
 
             var generateTask = function (queue, callOrder, expectLengh, processNumber) {
 
@@ -2562,7 +2562,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#iterator', function () {
+        describe('iterator()', function () {
 
             it('creates an iterator function', function (done) {
 
@@ -2639,7 +2639,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#retry', function () {
+        describe('retry()', function () {
 
             it('all attempts error', function (done) {
 
@@ -2757,7 +2757,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#auto', function () {
+        describe('auto()', function () {
 
             it('determines the best order to run tasks', function (done) {
 
@@ -3015,7 +3015,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#priorityQueue', function () {
+        describe('priorityQueue()', function () {
 
             it('completes tasks in priority order', function (done) {
 
@@ -3258,7 +3258,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#cargo', function () {
+        describe('cargo()', function () {
 
             it('supports default behavior', function (done) {
 
@@ -3520,7 +3520,7 @@ describe('Insync', function () {
 
     describe('Util', function () {
 
-        describe('#memoize', function () {
+        describe('memoize()', function () {
 
             it('successfully memoizes a function', function (done) {
 
@@ -3630,7 +3630,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#unmemoize', function () {
+        describe('unmemoize()', function () {
 
             it('successfully unmemoizes a function', function (done) {
 
@@ -3686,7 +3686,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#log', function () {
+        describe('log()', function () {
 
             it('displays the results of a function', function (done) {
 
@@ -3798,7 +3798,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#dir', function () {
+        describe('dir()', function () {
 
             // Theses tests would just be a duplicate of Insync.log.
             // Including a single test for completeness.
@@ -3827,7 +3827,7 @@ describe('Insync', function () {
             });
         });
 
-        describe('#noConflict', function () {
+        describe('noConflict()', function () {
 
             it('returns a reference to the original Insync', function (done) {
 
@@ -3839,7 +3839,7 @@ describe('Insync', function () {
 
     describe('Common', function () {
 
-        describe('#onlyOnce', function () {
+        describe('onlyOnce()', function () {
 
             it('does not throw if function is called once', function (done) {
 
