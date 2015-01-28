@@ -1,4 +1,4 @@
-# Insync
+![Insync](https://raw.github.com/cjihrig/insync/master/images/insync.png)
 
 [![Current Version](https://img.shields.io/npm/v/insync.svg)](https://www.npmjs.org/package/insync)
 [![Build Status via Travis CI](https://travis-ci.org/cjihrig/insync.svg?branch=master)](https://travis-ci.org/cjihrig/insync)
@@ -83,7 +83,7 @@ Insync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), fu
 
   // result is [1, 4, 9]
   // With the help of bind we can attach a context to the iterator before
-  // passing it to insync. Now the square function will be executed in its 
+  // passing it to insync. Now the square function will be executed in its
   // 'home' AsyncSquaringLibrary context and the value of `this.squareExponent`
   // will be as expected.
 });
@@ -167,8 +167,8 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A function to apply to each item in `arr`.
-  The iterator is passed a `callback(err)` which must be called once it has 
-  completed. If no error has occurred, the `callback` should be run without 
+  The iterator is passed a `callback(err)` which must be called once it has
+  completed. If no error has occurred, the `callback` should be run without
   arguments or with an explicit `null` argument.
 * `callback(err)` - A callback which is called when all `iterator` functions
   have finished, or an error occurs.
@@ -186,7 +186,7 @@ Insync.each(openFiles, saveFile, function (err) {
 ```
 
 ```javascript
-// assuming openFiles is an array of file names 
+// assuming openFiles is an array of file names
 
 Insync.each(openFiles, function (file, callback) {
 
@@ -237,8 +237,8 @@ __Arguments__
 * `arr` - An array to iterate over.
 * `limit` - The maximum number of `iterator`s to run at any time.
 * `iterator(item, callback)` - A function to apply to each item in `arr`.
-  The iterator is passed a `callback(err)` which must be called once it has 
-  completed. If no error has occurred, the callback should be run without 
+  The iterator is passed a `callback(err)` which must be called once it has
+  completed. If no error has occurred, the callback should be run without
   arguments or with an explicit `null` argument.
 * `callback(err)` - A callback which is called when all `iterator` functions
   have finished, or an error occurs.
@@ -263,14 +263,14 @@ Insync.eachLimit(documents, 20, requestApi, function (err) {
 Produces a new array of values by mapping each value in `arr` through the `iterator` function. The `iterator` is called with an item from `arr` and a callback for when it has finished processing. Each of these callback takes two arguments: an `error`, and the transformed item from `arr`. If `iterator` passes an error to his callback, the main `callback` (for the `map` function) is immediately called with the error.
 
 Note, that since this function applies the `iterator` to each item in parallel,
-there is no guarantee that the `iterator` functions will complete in order. 
+there is no guarantee that the `iterator` functions will complete in order.
 However, the results array will be in the same order as the original `arr`.
 
 __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A function to apply to each item in `arr`.
-  The iterator is passed a `callback(err, transformed)` which must be called once 
+  The iterator is passed a `callback(err, transformed)` which must be called once
   it has completed with an error (which can be `null`) and a transformed item.
 * `callback(err, results)` - A callback which is called when all `iterator`
   functions have finished, or an error occurs. Results is an array of the
@@ -306,7 +306,7 @@ __Arguments__
 * `arr` - An array to iterate over.
 * `limit` - The maximum number of `iterator`s to run at any time.
 * `iterator(item, callback)` - A function to apply to each item in `arr`.
-  The iterator is passed a `callback(err, transformed)` which must be called once 
+  The iterator is passed a `callback(err, transformed)` which must be called once
   it has completed with an error (which can be `null`) and a transformed item.
 * `callback(err, results)` - A callback which is called when all `iterator`
   calls have finished, or an error occurs. The result is an array of the
@@ -335,7 +335,7 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A truth test to apply to each item in `arr`.
-  The `iterator` is passed a `callback(truthValue)`, which must be called with a 
+  The `iterator` is passed a `callback(truthValue)`, which must be called with a
   boolean argument once it has completed.
 * `callback(results)` - A callback which is called after all the `iterator`
   functions have finished.
@@ -390,9 +390,9 @@ __Arguments__
 * `memo` - The initial state of the reduction.
 * `iterator(memo, item, callback)` - A function applied to each item in the
   array to produce the next step in the reduction. The `iterator` is passed a
-  `callback(err, reduction)` which accepts an optional error as its first 
-  argument, and the state of the reduction as the second. If an error is 
-  passed to the callback, the reduction is stopped and the main `callback` is 
+  `callback(err, reduction)` which accepts an optional error as its first
+  argument, and the state of the reduction as the second. If an error is
+  passed to the callback, the reduction is stopped and the main `callback` is
   immediately called with the error.
 * `callback(err, result)` - A callback which is called after all the `iterator`
   functions have finished. Result is the reduced value.
@@ -435,7 +435,7 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A truth test to apply to each item in `arr`.
-  The iterator is passed a `callback(truthValue)` which must be called with a 
+  The iterator is passed a `callback(truthValue)` which must be called with a
   boolean argument once it has completed.
 * `callback(result)` - A callback which is called as soon as any iterator returns
   `true`, or after all the `iterator` functions have finished. Result will be
@@ -530,7 +530,7 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A truth test to apply to each item in the array
-  in parallel. The iterator is passed a callback(truthValue) which must be 
+  in parallel. The iterator is passed a callback(truthValue) which must be
   called with a boolean argument once it has completed.
 * `callback(result)` - A callback which is called as soon as any iterator returns
   `true`, or after all the iterator functions have finished. Result will be
@@ -558,7 +558,7 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A truth test to apply to each item in the array
-  in parallel. The iterator is passed a callback(truthValue) which must be 
+  in parallel. The iterator is passed a callback(truthValue) which must be
   called with a  boolean argument once it has completed.
 * `callback(result)` - A callback which is called after all the `iterator`
   functions have finished. Result will be either `true` or `false` depending on
@@ -584,7 +584,7 @@ __Arguments__
 
 * `arr` - An array to iterate over.
 * `iterator(item, callback)` - A function to apply to each item in `arr`.
-  The iterator is passed a `callback(err, results)` which must be called once it 
+  The iterator is passed a `callback(err, results)` which must be called once it
   has completed with an error (which can be `null`) and an array of results.
 * `callback(err, results)` - A callback which is called after all the `iterator`
   functions have finished, or an error occurs. Results is an array containing
@@ -619,7 +619,7 @@ It is also possible to use an object instead of an array. Each property will be 
 
 > The mechanics and order of enumerating the properties is not specified.
 
-So, if you rely on the order in which your series of functions are executed, and want this to work on all platforms, consider using an array. 
+So, if you rely on the order in which your series of functions are executed, and want this to work on all platforms, consider using an array.
 
 __Arguments__
 
@@ -627,7 +627,7 @@ __Arguments__
   a `callback(err, result)` it must call on completion with an error `err` (which can
   be `null`) and an optional `result` value.
 * `callback(err, results)` - An optional callback to run once all the functions
-  have completed. This function gets a results array (or object) containing all 
+  have completed. This function gets a results array (or object) containing all
   the result arguments passed to the `task` callbacks.
 
 __Example__
@@ -686,11 +686,11 @@ It is also possible to use an object instead of an array. Each property will be 
 
 __Arguments__
 
-* `tasks` - An array or object containing functions to run. Each function is passed 
-  a `callback(err, result)` which it must call on completion with an error `err` 
+* `tasks` - An array or object containing functions to run. Each function is passed
+  a `callback(err, result)` which it must call on completion with an error `err`
   (which can be `null`) and an optional `result` value.
 * `callback(err, results)` - An optional callback to run once all the functions
-  have completed. This function gets a results array (or object) containing all 
+  have completed. This function gets a results array (or object) containing all
   the result arguments passed to the task callbacks.
 
 __Example__
@@ -751,12 +751,12 @@ Note that the `tasks` are not executed in batches, so there is no guarantee that
 
 __Arguments__
 
-* `tasks` - An array or object containing functions to run, each function is passed 
+* `tasks` - An array or object containing functions to run, each function is passed
   a `callback(err, result)` it must call on completion with an error `err` (which can
   be `null`) and an optional `result` value.
 * `limit` - The maximum number of `tasks` to run at any time.
 * `callback(err, results)` - An optional callback to run once all the functions
-  have completed. This function gets a results array (or object) containing all 
+  have completed. This function gets a results array (or object) containing all
   the result arguments passed to the `task` callbacks.
 
 ---------------------------------------
@@ -770,7 +770,7 @@ __Arguments__
 
 * `test()` - Synchronous truth test to perform before each execution of `fn`.
 * `fn(callback)` - A function which is called each time `test` passes. The function is
-  passed a `callback(err)`, which must be called once it has completed with an 
+  passed a `callback(err)`, which must be called once it has completed with an
   optional `err` argument.
 * `callback(err)` - A callback which is called after the test fails and repeated
   execution of `fn` has stopped.
@@ -797,7 +797,7 @@ Insync.whilst(
 <a name="doWhilst" />
 ### doWhilst(fn, test, callback)
 
-The post-check version of [`whilst`](#whilst). To reflect the difference in the order of operations, the arguments `test` and `fn` are switched. 
+The post-check version of [`whilst`](#whilst). To reflect the difference in the order of operations, the arguments `test` and `fn` are switched.
 
 `doWhilst` is to `whilst` as `do while` is to `while` in plain JavaScript.
 
@@ -848,9 +848,9 @@ Runs the `tasks` array of functions in series, each passing their results to the
 
 __Arguments__
 
-* `tasks` - An array of functions to run, each function is passed a 
+* `tasks` - An array of functions to run, each function is passed a
   `callback(err, result1, result2, ...)` it must call on completion. The first
-  argument is an error (which can be `null`) and any further arguments will be 
+  argument is an error (which can be `null`) and any further arguments will be
   passed as arguments in order to the next task.
 * `callback(err, [results])` - An optional callback to run once all the functions
   have completed. This will be passed the results of the last task's callback.
@@ -875,7 +875,7 @@ Insync.waterfall([
     }
 ], function (err, result) {
 
-   // result now equals 'done'    
+   // result now equals 'done'
 });
 ```
 
@@ -922,7 +922,7 @@ add1mul3(4, function (err, result) {
 <a name="seq" />
 ### seq(fn1, fn2...)
 
-Version of the compose function that is more natural to read. Each following function consumes the return value of the latter function. 
+Version of the compose function that is more natural to read. Each following function consumes the return value of the latter function.
 
 Each function is executed with the `this` binding of the composed function.
 
@@ -936,7 +936,7 @@ __Example__
 ```javascript
 // Requires lodash (or underscore), express3 and dresende's orm2.
 // Part of an app, that fetches cats of the logged user.
-// This example uses `seq` function to avoid overnesting and error 
+// This example uses `seq` function to avoid overnesting and error
 // handling clutter.
 app.get('/cats', function (request, response) {
 
@@ -1012,7 +1012,7 @@ Creates a `queue` object with the specified `concurrency`. Tasks added to the `q
 __Arguments__
 
 * `worker(task, callback)` - An asynchronous function for processing a queued
-  task, which must call its `callback(err)` argument when finished, with an 
+  task, which must call its `callback(err)` argument when finished, with an
   optional `error` as an argument.
 * `concurrency` - An `integer` for determining how many `worker` functions should be
   run in parallel.
@@ -1029,11 +1029,11 @@ methods:
 * `concurrency` - an integer for determining how many `worker` functions should be
   run in parallel. This property can be changed after a `queue` is created to
   alter the concurrency on-the-fly.
-* `push(task, [callback])` - add a new task to the `queue`. Calls `callback` once 
+* `push(task, [callback])` - add a new task to the `queue`. Calls `callback` once
   the `worker` has finished processing the task. Instead of a single task, a `tasks` array
   can be submitted. The respective callback is used for every task in the list.
 * `unshift(task, [callback])` - add a new task to the front of the `queue`.
-* `saturated` - a callback that is called when the `queue` length hits the `concurrency` limit, 
+* `saturated` - a callback that is called when the `queue` length hits the `concurrency` limit,
    and further tasks will be queued.
 * `empty` - a callback that is called when the last item from the `queue` is given to a `worker`.
 * `drain` - a callback that is called when the last item from the `queue` has returned from the `worker`.
@@ -1115,7 +1115,7 @@ While [queue](#queue) passes only one task to one of a group of workers at a tim
 __Arguments__
 
 * `worker(tasks, callback)` - An asynchronous function for processing an array of
-  queued tasks, which must call its `callback(err)` argument when finished, with 
+  queued tasks, which must call its `callback(err)` argument when finished, with
   an optional `err` argument.
 * `payload` - An optional `integer` for determining how many tasks should be
   processed per round; if omitted, the default is unlimited.
@@ -1129,7 +1129,7 @@ The `cargo` object returned by this function has the following properties and me
   process per round. This property can be changed after a `cargo` is created to
   alter the payload on-the-fly.
 * `push(task, [callback])` - Adds `task` to the `queue`. The callback is called
-  once the `worker` has finished processing the task. Instead of a single task, an array of `tasks` 
+  once the `worker` has finished processing the task. Instead of a single task, an array of `tasks`
   can be submitted. The respective callback is used for every task in the list.
 * `saturated` - A callback that is called when the `queue.length()` hits the concurrency and further tasks will be queued.
 * `empty` - A callback that is called when the last item from the `queue` is given to a `worker`.
@@ -1174,7 +1174,7 @@ Determines the best order for running the functions in `tasks`, based on their r
 
 If any of the functions pass an error to their callback, it will not complete (so any other functions depending on it will not run), and the main `callback` is immediately called with the error. Functions also receive an object containing the results of functions which have completed so far.
 
-Note, all functions are called with a `results` object as a second argument, so it is unsafe to pass functions in the `tasks` object which cannot handle the extra argument. 
+Note, all functions are called with a `results` object as a second argument, so it is unsafe to pass functions in the `tasks` object which cannot handle the extra argument.
 
 For example, this snippet of code:
 
@@ -1207,13 +1207,13 @@ __Arguments__
   requirements, with the function itself the last item in the array. The object's key
   of a property serves as the name of the task defined by that property,
   i.e. can be used when specifying requirements for other tasks.
-  The function receives two arguments: (1) a `callback(err, result)` which must be 
-  called when finished, passing an `error` (which can be `null`) and the result of 
+  The function receives two arguments: (1) a `callback(err, result)` which must be
+  called when finished, passing an `error` (which can be `null`) and the result of
   the function's execution, and (2) a `results` object, containing the results of
   the previously executed functions.
 * `callback(err, results)` - An optional callback which is called when all the
-  tasks have been completed. It receives the `err` argument if any `tasks` 
-  pass an error to their callback. Results are always returned; however, if 
+  tasks have been completed. It receives the `err` argument if any `tasks`
+  pass an error to their callback. Results are always returned; however, if
   an error occurs, no further `tasks` will be performed, and the results
   object will only contain partial results.
 
@@ -1306,7 +1306,7 @@ __Arguments__
 
 * `times` - An integer indicating how many times to attempt the `task` before giving up. Defaults to 5.
 * `task(callback, results)` - A function which receives two arguments: (1) a `callback(err, result)`
-  which must be called when finished, passing `err` (which can be `null`) and the `result` of 
+  which must be called when finished, passing `err` (which can be `null`) and the `result` of
   the function's execution, and (2) a `results` object, containing the results of
   the previously executed functions (if nested inside another control flow).
 * `callback(err, results)` - An optional callback which is called when the
@@ -1371,7 +1371,7 @@ node> nextfn();
 <a name="apply" />
 ### apply(function, arguments..)
 
-Creates a continuation function with some arguments already applied. 
+Creates a continuation function with some arguments already applied.
 
 Useful as a shorthand when combined with other control flow functions. Any arguments passed to the returned function are added to the arguments originally passed to apply.
 
