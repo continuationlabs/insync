@@ -6,6 +6,7 @@ var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Insync = require('../lib');
 var Common = require('../lib/common');
+var Util = require('../lib/util');
 
 // Declare internals
 
@@ -867,7 +868,6 @@ describe('Insync', function () {
             it('executes object of functions in series', function (done) {
 
                 var callOrder = [];
-
                 Insync.series({
                     zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(null, 0); }, 100); },
                     one: function (callback) { setTimeout(function () { callOrder.push(1); callback(null, 1); }, 100); },
@@ -876,7 +876,7 @@ describe('Insync', function () {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal([0, 1, 2]);
-                    expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
+                    expect(results).to.deep.equal(Util._hash({ zero: 0, one: 1, two: [2, 3] }));
                     done();
                 });
             });
@@ -910,7 +910,7 @@ describe('Insync', function () {
                 }, function (err, results) {
 
                     expect(err).to.not.exist();
-                    expect(results).to.deep.equal({ zero: undefined });
+                    expect(results).to.deep.equal(Util._hash({ zero: undefined }));
                     done();
                 });
             });
@@ -985,7 +985,7 @@ describe('Insync', function () {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal([2, 0, 1]);
-                    expect(results).to.deep.equal({ zero: 0, one: 1, two: [2, 3] });
+                    expect(results).to.deep.equal(Util._hash({ zero: 0, one: 1, two: [2, 3] }));
                     done();
                 });
             });
@@ -2807,14 +2807,14 @@ describe('Insync', function () {
 
                     expect(err).to.not.exist();
                     expect(callOrder).to.deep.equal(['task2','task6','task3','task5','task1','task4']);
-                    expect(results).to.deep.equal({
+                    expect(results).to.deep.equal(Util._hash({
                         task1: [1, 10],
                         task2: 2,
                         task3: 3,
                         task4: 4,
                         task5: undefined,
                         task6: 6
-                    });
+                    }));
                     done();
                 });
             });
@@ -2969,12 +2969,12 @@ describe('Insync', function () {
 
                     expect(err).to.not.exist();
                     expect(results.inserted).to.equal(true);
-                    expect(results).to.deep.equal({
+                    expect(results).to.deep.equal(Util._hash({
                         task1: 'task1',
                         task2: 'task2',
                         task3: 'task3',
                         inserted: true
-                    });
+                    }));
                     done();
                 });
             });
@@ -3832,6 +3832,23 @@ describe('Insync', function () {
             it('returns a reference to the original Insync', function (done) {
 
                 expect(Insync.noConflict()).to.equal(Insync);
+                done();
+            });
+        });
+
+        describe('_hash()', function () {
+
+            it('returns an object with a null prototype', function (done) {
+
+                var result = Util._hash();
+                expect(result.hasOwnKey).to.be.undefined();
+                done();
+            });
+
+            it('initializes values when supplied', function (done) {
+
+                var result = Util._hash({ foo: 1, bar: 2 });
+                expect(result).to.deep.equal(Util._hash({ foo: 1, bar: 2 }));
                 done();
             });
         });
