@@ -1,3 +1,6 @@
+'use strict';
+/* eslint "hapi/hapi-scope-start": [1, "allow-one-liners", 2] */
+
 // Load Modules
 
 var Domain = require('domain');
@@ -67,7 +70,7 @@ internals.doNothing = function () {
     var args = Array.prototype.slice.call(arguments);
     var callback = args.pop();
 
-    setTimeout(function() {
+    setTimeout(function () {
 
         callback(null);
     }, 100);
@@ -125,7 +128,7 @@ describe('Insync', function () {
 
                 Insync.each([1], function (item, callback) {
 
-                    setTimeout(function() {
+                    setTimeout(function () {
 
                         callback(new Error('async error'));
                     });
@@ -150,7 +153,7 @@ describe('Insync', function () {
 
                 var result = [];
 
-                Insync.eachSeries([1,3,2], internals.eachAsync(result), function (error) {
+                Insync.eachSeries([1, 3, 2], internals.eachAsync(result), function (error) {
 
                     expect(error).to.not.exist();
                     expect(result).to.deep.equal([1, 3, 2]);
@@ -185,7 +188,7 @@ describe('Insync', function () {
 
                 Insync.eachSeries([1], function (item, callback) {
 
-                    setTimeout(function() {
+                    setTimeout(function () {
 
                         callback(new Error('async error'));
                     });
@@ -495,10 +498,10 @@ describe('Insync', function () {
 
             it('handles errors', function (done) {
 
-                Insync.reduce([1, 2, 3], 0, function(a, x, callback) {
+                Insync.reduce([1, 2, 3], 0, function (a, x, callback) {
 
                     callback(new Error());
-                }, function(err) {
+                }, function (err) {
 
                     expect(err).to.exist();
                     done();
@@ -647,7 +650,7 @@ describe('Insync', function () {
 
                 var callOrder = [];
 
-                Insync.some([1, 2, 3], function(item, callback) {
+                Insync.some([1, 2, 3], function (item, callback) {
 
                     setTimeout(function () {
 
@@ -710,7 +713,7 @@ describe('Insync', function () {
 
                 var callOrder = [];
 
-                Insync.every([1, 2, 3], function(item, callback) {
+                Insync.every([1, 2, 3], function (item, callback) {
 
                     setTimeout(function () {
 
@@ -1057,6 +1060,7 @@ describe('Insync', function () {
                     callOrder.push(['iterator', count]);
 
                     setTimeout(function () {
+
                         count++;
 
                         if (count === 2) {
@@ -1157,6 +1161,7 @@ describe('Insync', function () {
                     callOrder.push(['iterator', count]);
 
                     setTimeout(function () {
+
                         count++;
 
                         if (count === 2) {
@@ -1232,6 +1237,7 @@ describe('Insync', function () {
                     callOrder.push(['iterator', count]);
 
                     setTimeout(function () {
+
                         count++;
 
                         if (count === 2) {
@@ -1332,6 +1338,7 @@ describe('Insync', function () {
                     callOrder.push(['iterator', count]);
 
                     setTimeout(function () {
+
                         count++;
 
                         if (count === 2) {
@@ -1796,8 +1803,8 @@ describe('Insync', function () {
                 };
 
                 Insync.parallelLimit([
-                    function (callback) {callback(); },
-                    function (callback) {callback();}
+                    function (callback) { callback(); },
+                    function (callback) { callback(); }
                 ], 1);
             });
         });
@@ -2164,6 +2171,7 @@ describe('Insync', function () {
                 q.concurrency = 1;
 
                 setTimeout(function () {
+
                     expect(callOrder).to.deep.equal([
                         'process 1', 'callback 1',
                         'process 2', 'callback 2',
@@ -2234,7 +2242,7 @@ describe('Insync', function () {
                 var q = Insync.queue(function (task, callback) {
 
                     callback();
-                    expect(function() {
+                    expect(function () {
 
                         callback();
                     }).to.throw();
@@ -2461,7 +2469,7 @@ describe('Insync', function () {
                     }, 300);
                 });
 
-                q.drain = function() {
+                q.drain = function () {
 
                     drainCalled = true;
                 };
@@ -2469,7 +2477,7 @@ describe('Insync', function () {
                 q.push(0);
                 q.kill();
 
-                setTimeout(function() {
+                setTimeout(function () {
 
                     expect(q.length()).to.equal(0);
                     expect(drainCalled).to.be.false();
@@ -2499,7 +2507,7 @@ describe('Insync', function () {
 
             it('maintains started property', function (done) {
 
-                var q = Insync.queue(function(task, cb) {});
+                var q = Insync.queue(function (task, cb) {});
 
                 expect(q.started).to.equal(false);
                 q.push([]);
@@ -2623,7 +2631,7 @@ describe('Insync', function () {
                 var fn = iterator.next();
                 var iterator2 = fn('arg1');
                 expect(callOrder).to.deep.equal([2]);
-                iterator2('arg1','arg2');
+                iterator2('arg1', 'arg2');
                 expect(callOrder).to.deep.equal([2, 3]);
                 expect(iterator2.next()).to.not.exist();
                 done();
@@ -2785,7 +2793,7 @@ describe('Insync', function () {
                         callOrder.push('task3');
                         callback(null, 3);
                     }],
-                    task4: ['task1', 'task2', function(callback) {
+                    task4: ['task1', 'task2', function (callback) {
 
                         callOrder.push('task4');
                         callback(null, 4);
@@ -2806,7 +2814,7 @@ describe('Insync', function () {
                 }, function (err, results) {
 
                     expect(err).to.not.exist();
-                    expect(callOrder).to.deep.equal(['task2','task6','task3','task5','task1','task4']);
+                    expect(callOrder).to.deep.equal(['task2', 'task6', 'task3', 'task5', 'task1', 'task4']);
                     expect(results).to.deep.equal({
                         task1: [1, 10],
                         task2: 2,
