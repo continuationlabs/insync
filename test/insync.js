@@ -1,5 +1,4 @@
 'use strict';
-/* eslint "hapi/hapi-scope-start": [1, "allow-one-liners", 2] */
 
 // Load Modules
 
@@ -8,7 +7,7 @@ var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Insync = require('../lib');
-var Common = require('../lib/common');
+var Util = require('../lib/util');
 
 // Declare internals
 
@@ -23,6 +22,18 @@ internals.eachAsync = function (result) {
             result.push(item);
             callback(null);
         }, item * 100);
+    };
+};
+
+internals.eachOfAsync = function (result) {
+
+    return function (value, key, callback) {
+
+        setTimeout(function () {
+
+            result.push([value, key]);
+            callback(null);
+        }, value * 100);
     };
 };
 
@@ -47,7 +58,7 @@ internals.filterAsync = function (callOrder) {
 
         setTimeout(function () {
 
-            callback(item > 1);
+            callback(null, item > 1);
         }, item * 100);
     };
 };
@@ -103,11 +114,11 @@ describe('Insync', function () {
 
             it('provides a default callback if one is not provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -117,7 +128,7 @@ describe('Insync', function () {
 
             it('short circuits if the array is empty', function (done) {
 
-                Insync.each([], Common.noop, function (error) {
+                Insync.each([], Util.noop, function (error) {
 
                     expect(error).to.not.exist();
                     done();
@@ -163,11 +174,11 @@ describe('Insync', function () {
 
             it('provides a default callback if one is not provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -177,7 +188,7 @@ describe('Insync', function () {
 
             it('short circuits if the array is empty', function (done) {
 
-                Insync.eachSeries([], Common.noop, function (error) {
+                Insync.eachSeries([], Util.noop, function (error) {
 
                     expect(error).to.not.exist();
                     done();
@@ -270,11 +281,11 @@ describe('Insync', function () {
 
             it('provides a default callback if one is not provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -285,6 +296,297 @@ describe('Insync', function () {
             it('is aliased as forEachLimit()', function (done) {
 
                 expect(Insync.eachLimit).to.equal(Insync.forEachLimit);
+                done();
+            });
+        });
+
+        describe('eachOf()', function () {
+
+            it('iterates over an array in parallel', function (done) {
+
+                var result = [];
+
+                Insync.eachOf([4, 3, 2, 1], internals.eachOfAsync(result), function (error) {
+
+                    expect(error).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [1, 3],
+                        [2, 2],
+                        [3, 1],
+                        [4, 0]
+                    ]);
+                    done();
+                });
+            });
+
+            it('iterates over an object in parallel', function (done) {
+
+                var result = [];
+
+                Insync.eachOf({
+                    a: 4,
+                    b: 3,
+                    c: 2,
+                    d: 1
+                }, internals.eachOfAsync(result), function (error) {
+
+                    expect(error).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [1, 'd'],
+                        [2, 'c'],
+                        [3, 'b'],
+                        [4, 'a']
+                    ]);
+                    done();
+                });
+            });
+
+            it('provides a default callback if one is not provided', function (done) {
+
+                var noop = Util.noop;
+
+                Util.noop = function (error) {
+
+                    Util.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Insync.eachOf([4], internals.doNothing);
+            });
+
+            it('short circuits if the array is empty', function (done) {
+
+                Insync.eachOf([], function (value, key, callback) {
+
+                    expect(true).to.equal(false);
+                    callback();
+                }, function (error) {
+
+                    expect(error).to.not.exist();
+                    done();
+                });
+            });
+
+            it('sends an error when it occurs', function (done) {
+
+                Insync.eachOf([1], function (value, key, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('async error'));
+                    });
+                }, function (error) {
+
+                    expect(error).to.exist();
+                    expect(error.message).to.equal('async error');
+                    done();
+                });
+            });
+
+            it('is aliased as forEachOf()', function (done) {
+
+                expect(Insync.eachOf).to.equal(Insync.forEachOf);
+                done();
+            });
+        });
+
+        describe('eachOfSeries()', function () {
+
+            it('iterates over an array in series', function (done) {
+
+                var result = [];
+
+                Insync.eachOfSeries([1, 3, 2], internals.eachOfAsync(result), function (error) {
+
+                    expect(error).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [1, 0],
+                        [3, 1],
+                        [2, 2]
+                    ]);
+                    done();
+                });
+            });
+
+            it('iterates over an object in series', function (done) {
+
+                var result = [];
+
+                Insync.eachOfSeries({
+                    a: 4,
+                    b: 3,
+                    c: 2,
+                    d: 1
+                }, internals.eachOfAsync(result), function (error) {
+
+                    expect(error).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [4, 'a'],
+                        [3, 'b'],
+                        [2, 'c'],
+                        [1, 'd']
+                    ]);
+                    done();
+                });
+            });
+
+            it('provides a default callback if one is not provided', function (done) {
+
+                var noop = Util.noop;
+
+                Util.noop = function (error) {
+
+                    Util.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Insync.eachOfSeries([1], internals.doNothing);
+            });
+
+            it('short circuits if the array is empty', function (done) {
+
+                Insync.eachOfSeries([], Util.noop, function (error) {
+
+                    expect(error).to.not.exist();
+                    done();
+                });
+            });
+
+            it('sends an error when it occurs', function (done) {
+
+                Insync.eachOfSeries([1], function (value, key, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('async error'));
+                    });
+                }, function (error) {
+
+                    expect(error).to.exist();
+                    expect(error.message).to.equal('async error');
+                    done();
+                });
+            });
+
+            it('is aliased as forEachOfSeries()', function (done) {
+
+                expect(Insync.eachOfSeries).to.equal(Insync.forEachOfSeries);
+                done();
+            });
+        });
+
+        describe('eachOfLimit()', function () {
+
+            it('iterates over an array with a limit', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Insync.eachOfLimit(arr, 2, internals.eachOfAsync(result), function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [0, 0],
+                        [1, 1],
+                        [2, 2],
+                        [3, 3]
+                    ]);
+                    done();
+                });
+            });
+
+            it('iterates over an object with a limit', function (done) {
+
+                var obj = {
+                    a: 0,
+                    b: 1,
+                    c: 2,
+                    d: 3
+                };
+                var result = [];
+
+                Insync.eachOfLimit(obj, 2, internals.eachOfAsync(result), function (err) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.deep.equal([
+                        [0, 'a'],
+                        [1, 'b'],
+                        [2, 'c'],
+                        [3, 'd']
+                    ]);
+                    done();
+                });
+            });
+
+            it('does not call iterator if array is empty', function (done) {
+
+                Insync.eachOfLimit([], 2, function (value, key, callback) {
+
+                    expect(true).to.equal(false);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('does not call iterator if limit is zero', function (done) {
+
+                Insync.eachOfLimit([1, 2, 3], 0, function (value, key, callback) {
+
+                    expect(true).to.equal(false);
+                }, function (err) {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+
+            it('properly passes error to final callback', function (done) {
+
+                var arr = [0, 1, 2, 3];
+                var result = [];
+
+                Insync.eachOfLimit(arr, 2, function (value, key, callback) {
+
+                    result.push([value, key]);
+
+                    if (value === 2) {
+                        return callback(new Error('foo'));
+                    }
+
+                    callback();
+                }, function (err) {
+
+                    expect(err).to.exist();
+                    expect(result).to.deep.equal([
+                        [0, 0],
+                        [1, 1],
+                        [2, 2]
+                    ]);
+                    done();
+                });
+            });
+
+            it('provides a default callback if one is not provided', function (done) {
+
+                var noop = Util.noop;
+
+                Util.noop = function (error) {
+
+                    Util.noop = noop;
+                    expect(error).to.not.exist();
+                    done();
+                };
+
+                Insync.eachOfLimit([1, 2, 3, 4], 2, internals.doNothing);
+            });
+
+            it('is aliased as forEachOfLimit()', function (done) {
+
+                expect(Insync.eachOfLimit).to.equal(Insync.forEachOfLimit);
                 done();
             });
         });
@@ -408,11 +710,32 @@ describe('Insync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Insync.filter(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.filter(arr, internals.filterAsync(callOrder), function (err, results) {
 
+                    expect(err).not.to.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(results).to.deep.equal([2, 3]);
                     done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                var doneCalled = false;
+
+                Insync.filter([0, 1, 2], function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 50);
+                }, function (err, results) {
+
+                    expect(err).to.exist();
+                    expect(results).to.not.exist();
+                    expect(doneCalled).to.equal(false);
+                    doneCalled = true;
+                    setTimeout(done, 100);
                 });
             });
 
@@ -430,8 +753,9 @@ describe('Insync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Insync.filterSeries(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.filterSeries(arr, internals.filterAsync(callOrder), function (err, results) {
 
+                    expect(err).not.to.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(callOrder).to.deep.equal(arr);
                     expect(results).to.deep.equal([2, 3]);
@@ -453,11 +777,32 @@ describe('Insync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Insync.reject(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.reject(arr, internals.filterAsync(callOrder), function (err, results) {
 
+                    expect(err).to.not.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(results).to.deep.equal([0, 1]);
                     done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                var doneCalled = false;
+
+                Insync.reject([0, 1, 2], function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 50);
+                }, function (err, results) {
+
+                    expect(err).to.exist();
+                    expect(results).to.not.exist();
+                    expect(doneCalled).to.equal(false);
+                    doneCalled = true;
+                    setTimeout(done, 100);
                 });
             });
         });
@@ -469,8 +814,9 @@ describe('Insync', function () {
                 var arr = [0, 1, 2, 3];
                 var callOrder = [];
 
-                Insync.rejectSeries(arr, internals.filterAsync(callOrder), function (results) {
+                Insync.rejectSeries(arr, internals.filterAsync(callOrder), function (err, results) {
 
+                    expect(err).to.not.exist();
                     expect(arr).to.deep.equal([0, 1, 2, 3]);
                     expect(callOrder).to.deep.equal(arr);
                     expect(results).to.deep.equal([0, 1]);
@@ -498,13 +844,17 @@ describe('Insync', function () {
 
             it('handles errors', function (done) {
 
+                var doneCalled = false;
+
                 Insync.reduce([1, 2, 3], 0, function (a, x, callback) {
 
                     callback(new Error());
                 }, function (err) {
 
                     expect(err).to.exist();
-                    done();
+                    expect(doneCalled).to.equal(false);
+                    doneCalled = true;
+                    setTimeout(done, 100);
                 });
             });
 
@@ -558,10 +908,11 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item === 2);
+                        callback(null, item === 2);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(2);
                     done();
                 });
@@ -578,11 +929,30 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item === 6);
+                        callback(null, item === 6);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(undefined);
+                    done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Insync.detect(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 100);
+                }, function (err, result) {
+
+                    expect(err).to.exist();
+                    expect(result).to.not.exist();
                     done();
                 });
             });
@@ -599,12 +969,45 @@ describe('Insync', function () {
                     callOrder.push(item);
                     setTimeout(function () {
 
-                        callback(item === 2);
+                        callback(null, item === 2);
                     }, 10);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(2);
                     expect(callOrder).to.deep.equal([3, 2]);
+                    done();
+                });
+            });
+
+            it('stops on a match', function (done) {
+
+                Insync.detectSeries([1, 2, 3, 4], function (item, callback) {
+
+                    expect(item).to.be.at.most(3);
+                    callback(null, item === 3);
+                }, function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal(3);
+                    done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                var arr = [0, 1, 2, 3];
+
+                Insync.detectSeries(arr, function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 100);
+                }, function (err, result) {
+
+                    expect(err).to.exist();
+                    expect(result).to.not.exist();
                     done();
                 });
             });
@@ -620,10 +1023,11 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item === 2);
+                        callback(null, item === 2);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(true);
                     done();
                 });
@@ -637,10 +1041,11 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item === 6);
+                        callback(null, item === 6);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(false);
                     done();
                 });
@@ -655,13 +1060,30 @@ describe('Insync', function () {
                     setTimeout(function () {
 
                         callOrder.push(item);
-                        callback(item === 1);
+                        callback(null, item === 1);
                     }, item * 25);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(true);
                     expect(callOrder).to.deep.equal([1]);
                     // note that 2 and 3 are still executed
+                    done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                Insync.some([1, 2, 3], function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 100);
+                }, function (err, result) {
+
+                    expect(err).to.exist();
+                    expect(result).to.not.exist();
                     done();
                 });
             });
@@ -683,10 +1105,11 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item >= 0 && item < 4);
+                        callback(null, item >= 0 && item < 4);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(true);
                     done();
                 });
@@ -700,10 +1123,11 @@ describe('Insync', function () {
 
                     setTimeout(function () {
 
-                        callback(item >= 1);
+                        callback(null, item >= 1);
                     }, 100);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(false);
                     done();
                 });
@@ -718,13 +1142,30 @@ describe('Insync', function () {
                     setTimeout(function () {
 
                         callOrder.push(item);
-                        callback(item === 1);
+                        callback(null, item === 1);
                     }, item * 25);
-                }, function (result) {
+                }, function (err, result) {
 
+                    expect(err).to.not.exist();
                     expect(result).to.equal(false);
                     expect(callOrder).to.deep.equal([1, 2]);
                     // note that 3 is still executed
+                    done();
+                });
+            });
+
+            it('handles errors', function (done) {
+
+                Insync.every([1, 2, 3], function (item, callback) {
+
+                    setTimeout(function () {
+
+                        callback(new Error('foo'));
+                    }, 100);
+                }, function (err, result) {
+
+                    expect(err).to.exist();
+                    expect(result).to.not.exist();
                     done();
                 });
             });
@@ -942,11 +1383,11 @@ describe('Insync', function () {
 
             it('handles case where no callback is provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -995,17 +1436,34 @@ describe('Insync', function () {
 
             it('handles case where no callback is provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
 
                 Insync.parallel({
                     zero: function (callback) { setTimeout(function () { callback(null, 0); }, 100); }
+                });
+            });
+
+            it('handles callbacks that pass no arguments', function (done) {
+
+                var callOrder = [];
+
+                Insync.parallel({
+                    zero: function (callback) { setTimeout(function () { callOrder.push(0); callback(); }, 50); },
+                    one: function (callback) { setTimeout(function () { callOrder.push(1); callback(); }, 100); },
+                    two: function (callback) { setTimeout(function () { callOrder.push(2); callback(); }, 10); }
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(callOrder).to.deep.equal([2, 0, 1]);
+                    expect(results).to.deep.equal({ zero: undefined, one: undefined, two: undefined });
+                    done();
                 });
             });
         });
@@ -1456,11 +1914,11 @@ describe('Insync', function () {
 
             it('works if final callback function is not provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -1511,6 +1969,46 @@ describe('Insync', function () {
                     done();
                 });
             });
+
+            it('handles tasks that callback with no arguments', function (done) {
+
+                var called = 0;
+
+                var task = function (callback) {
+
+                    called++;
+                    callback();
+                };
+
+                Insync.waterfall([
+                    task,
+                    task
+                ], function () {
+
+                    expect(arguments.length).to.equal(0);
+                    expect(called).to.equal(2);
+                    done();
+                });
+            });
+
+            it('throws error if callback is called twice', function (done) {
+
+                var called = false;
+
+                Insync.waterfall([
+                    function (callback) {
+
+                        expect(callback).not.to.throw();
+                        expect(callback).to.throw(Error, 'Callback was already called');
+                        expect(called).to.equal(true);
+                        done();
+                    }
+                ], function (err) {
+
+                    expect(err).to.not.exist();
+                    called = true;
+                });
+            });
         });
 
         describe('times()', function () {
@@ -1544,6 +2042,27 @@ describe('Insync', function () {
                     expect(err).to.not.exist();
                     expect(results).to.deep.equal([0, 1, 2, 3, 4]);
                     expect(callOrder).to.deep.equal([0, 1, 2, 3, 4]);
+                    done();
+                });
+            });
+        });
+
+        describe('timesLimit()', function () {
+
+            it('executes a function a number of times with a limit', function (done) {
+
+                var limit = 2;
+                var running = 0;
+
+                Insync.timesLimit(5, limit, function (n, callback) {
+
+                    running++;
+                    expect(running).to.be.at.most(limit);
+                    setTimeout(function () { running--; callback(null, n); }, 10);
+                }, function (err, results) {
+
+                    expect(err).to.not.exist();
+                    expect(results).to.deep.equal([0, 1, 2, 3, 4]);
                     done();
                 });
             });
@@ -1793,11 +2312,11 @@ describe('Insync', function () {
 
             it('handles omitted final callback', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -1916,6 +2435,27 @@ describe('Insync', function () {
                     done();
                 });
             });
+
+            it('handles functions with no arguments', function (done) {
+
+                var cnt = 0;
+
+                var noop = function (cb) {
+
+                    cnt++;
+                    setTimeout(cb, 50);
+                };
+
+                var noopSeq = Insync.seq(noop, noop, noop);
+
+                noopSeq(function (err, result) {
+
+                    expect(err).to.not.exist();
+                    expect(cnt).to.equal(3);
+                    expect(result).to.equal(undefined);
+                    done();
+                });
+            });
         });
 
         describe('compose()', function () {
@@ -2029,16 +2569,43 @@ describe('Insync', function () {
 
         describe('queue()', function () {
 
-            var generateTask = function (queue, callOrder, expectLengh, processNumber) {
+            var generateTask = function (queue, callOrder, expectLength, processNumber) {
 
                 return function (err, arg) {
 
                     expect(err).to.equal('error');
                     expect(arg).to.equal('arg');
-                    expect(queue.length()).to.equal(expectLengh);
+                    expect(queue.length()).to.equal(expectLength);
                     callOrder.push('callback ' + processNumber);
                 };
             };
+
+            it('throws if concurrency is not a positive integer', function (done) {
+
+                var fail = function (concurrency) {
+
+                    expect(function () {
+
+                        Insync.queue(Util.noop, concurrency);
+                    }).to.throw(RangeError, 'Concurrency must be a positive integer');
+                };
+
+                fail(0);
+                fail(-1);
+                fail(3.14);
+                fail(Infinity);
+                fail(-Infinity);
+                fail(NaN);
+                fail(null);
+                fail('');
+                fail('foo');
+                fail(false);
+                fail(true);
+                fail([]);
+                fail({});
+                // No need to test undefined, as that causes concurrency = 1
+                done();
+            });
 
             it('creates a queue object with the specified concurrency', function (done) {
 
@@ -2185,6 +2752,35 @@ describe('Insync', function () {
                 }, 250);
             });
 
+            it('changes concurrency on different tick', function (done) {
+
+                var q = Insync.queue(function (task, callback) {
+
+                    setTimeout(callback, 20);
+                }, 1);
+
+                for (var i = 0; i < 50; ++i) {
+                    q.push('');
+                }
+
+                q.drain = done;
+
+                setTimeout(function () {
+
+                    expect(q.concurrency).to.equal(1);
+                    q.concurrency = 2;
+                    setTimeout(function () {
+
+                        expect(q.running()).to.equal(2);
+                        q.concurrency = 5;
+                        setTimeout(function () {
+
+                            expect(q.running()).to.equal(5);
+                        }, 100);
+                    }, 100);
+                }, 100);
+            });
+
             it('supports tasks without callback functions', function (done) {
 
                 var callOrder = [];
@@ -2326,7 +2922,7 @@ describe('Insync', function () {
                     var start = Date.now();
                     return function () {
 
-                        return Math.floor((Date.now() - start) / 100) * 100;
+                        return Math.round((Date.now() - start) / 100) * 100;
                     };
                 }());
 
@@ -2401,7 +2997,7 @@ describe('Insync', function () {
                     var start = Date.now();
                     return function () {
 
-                        return Math.floor((Date.now() - start) / 100) * 100;
+                        return Math.round((Date.now() - start) / 100) * 100;
                     };
                 }());
 
@@ -2568,6 +3164,38 @@ describe('Insync', function () {
                 q.push('4', function () { calls.push('4 cb'); });
                 q.push('5', function () { calls.push('5 cb'); });
             });
+
+            it('supports starting paused', function (done) {
+
+                var q = Insync.queue(function (task, callback) {
+
+                    setTimeout(callback, 10);
+                }, 2);
+
+                q.pause();
+                q.push([1, 2, 3]);
+
+                setTimeout(q.resume, 10);
+
+                setTimeout(function () {
+
+                    expect(q.running()).to.equal(2);
+                    q.resume();
+                }, 15);
+
+                q.drain = done;
+            });
+
+            it('throws when pushing a non-function', function (done) {
+
+                var q = Insync.queue(Util.noop, 1);
+
+                expect(function() {
+
+                    q.push({}, 1);
+                }).to.throw(TypeError, 'Callback must be a function');
+                done();
+            });
         });
 
         describe('iterator()', function () {
@@ -2696,6 +3324,34 @@ describe('Insync', function () {
                 });
             });
 
+            it('retries with interval when all attempts succeed', function (done) {
+
+                var times = 3;
+                var interval = 100;
+                var callCount = 0;
+
+                var fn = function (callback) {
+
+                    callCount++;
+                    callback(new Error(callCount), callCount);
+                };
+
+                var start = Date.now();
+
+                Insync.retry({ times: times, interval: interval }, fn, function (err, result) {
+
+                    var elapsed = Date.now() - start;
+
+                    expect(elapsed > (interval * (times - 1))).to.equal(true);
+                    expect(callCount).to.equal(3);
+                    expect(err).to.exist();
+                    expect(err.message).to.equal(callCount + '');
+                    expect(result).to.exist();
+                    expect(result).to.equal(callCount);
+                    done();
+                });
+            });
+
             it('uses default number of retries', function (done) {
 
                 var times = 5;
@@ -2738,7 +3394,28 @@ describe('Insync', function () {
                 });
             });
 
-            it('as an embedded task', function (done) {
+            it('uses default options with object', function (done) {
+
+                var times = 5;
+                var callCount = 0;
+
+                var fn = function (callback, results) {
+
+                    callCount++;
+                    callback(new Error(callCount), callCount);
+                };
+
+                Insync.retry({}, fn, function (err, result) {
+
+                    expect(callCount).to.equal(times);
+                    expect(err).to.exist();
+                    expect(err.message).to.equal(times + '');
+                    expect(result).to.equal(callCount);
+                    done();
+                });
+            });
+
+            it('is an embedded task', function (done) {
 
                 var retryResult = 'RETRY';
                 var fooResults;
@@ -2762,6 +3439,50 @@ describe('Insync', function () {
                     expect(fooResults).to.equal(retryResults);
                     done();
                 });
+            });
+
+            it('embedded task with a retry interval', function (done) {
+
+                var start = Date.now();
+                var options = { times: 5, interval: 100 };
+
+                Insync.auto({
+                    foo: function (callback) {
+
+                        callback(null, 'FOO');
+                    },
+                    retry: Insync.retry(options, function (callback) {
+
+                        callback(new Error());
+                    })
+                }, function (err, results) {
+
+                    var duration = Date.now() - start;
+                    var expected = (options.times - 1) * options.interval;
+
+                    expect(duration).to.be.at.least(expected);
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+
+            it('throws on invalid arguments', function (done) {
+
+                var fail = function (times) {
+
+                    expect(function () {
+
+                        Insync.retry(times, Util.noop);
+                    }).to.throw(TypeError, 'Retry expects number or object');
+                };
+
+                fail(undefined);
+                fail(null);
+                fail('');
+                fail('foo');
+                fail(true);
+                fail(false);
+                done();
             });
         });
 
@@ -2877,11 +3598,11 @@ describe('Insync', function () {
 
             it('works when no callback is provided', function (done) {
 
-                var noop = Common.noop;
+                var noop = Util.noop;
 
-                Common.noop = function (error) {
+                Util.noop = function (error) {
 
-                    Common.noop = noop;
+                    Util.noop = noop;
                     expect(error).to.not.exist();
                     done();
                 };
@@ -3020,6 +3741,38 @@ describe('Insync', function () {
                     expect(finalCallCount).to.equal(1);
                     done();
                 }, 100);
+            });
+
+            it('does not deadlock due to inexistant dependencies', function (done) {
+
+                expect(function () {
+
+                    Insync.auto({
+                        task1: ['doesnotexist', function (callback, results) {
+
+                            callback(null, 'task1');
+                        }]
+                    });
+                }).to.throw(Error, 'Has inexistant dependency');
+                done();
+            });
+
+            it('does not deadlock due to cyclic dependencies', function (done) {
+
+                expect(function () {
+
+                    Insync.auto({
+                        task1: ['task2', function (callback, results) {
+
+                            callback(null, 'task1');
+                        }],
+                        task2: ['task1', function (callback, results) {
+
+                            callback(null, 'task2');
+                        }]
+                    });
+                }).to.throw(Error, 'Has cyclic dependencies');
+                done();
             });
         });
 
@@ -3264,6 +4017,17 @@ describe('Insync', function () {
                 expect(q.length()).to.equal(1);
                 expect(q.concurrency).to.equal(1);
             });
+
+            it('throws when pushing a non-function', function (done) {
+
+                var q = Insync.priorityQueue(Util.noop, 1);
+
+                expect(function() {
+
+                    q.push({}, 1, 1);
+                }).to.throw(TypeError, 'Callback must be a function');
+                done();
+            });
         });
 
         describe('cargo()', function () {
@@ -3278,7 +4042,6 @@ describe('Insync', function () {
 
                 var c = Insync.cargo(function (tasks, callback) {
 
-                    expect(c.running()).to.be.true();
                     setTimeout(function () {
 
                         var task = tasks.join(' ');
@@ -3290,7 +4053,7 @@ describe('Insync', function () {
 
                 c.push(1, function (err, arg) {
 
-                    expect(c.running()).to.be.false();
+                    expect(c.running()).to.equal(0);
                     expect(err).to.exist();
                     expect(err.message).to.equal('1 2');
                     expect(arg).to.equal('1 2');
@@ -3300,7 +4063,7 @@ describe('Insync', function () {
 
                 c.push(2, function (err, arg) {
 
-                    expect(c.running()).to.be.false();
+                    expect(c.running()).to.equal(0);
                     expect(err).to.exist();
                     expect(err.message).to.equal('1 2');
                     expect(arg).to.equal('1 2');
@@ -3309,14 +4072,14 @@ describe('Insync', function () {
                 });
 
                 expect(c.length()).to.equal(2);
-                expect(c.running()).to.be.false();
+                expect(c.running()).to.equal(0);
 
                 // Async push
                 setTimeout(function () {
 
                     c.push(3, function (err, arg) {
 
-                        expect(c.running()).to.be.false();
+                        expect(c.running()).to.equal(0);
                         expect(err).to.exist();
                         expect(err.message).to.equal('3 4');
                         expect(arg).to.equal('3 4');
@@ -3329,7 +4092,7 @@ describe('Insync', function () {
 
                     c.push(4, function (err, arg) {
 
-                        expect(c.running()).to.be.false();
+                        expect(c.running()).to.equal(0);
                         expect(err).to.exist();
                         expect(err.message).to.equal('3 4');
                         expect(arg).to.equal('3 4');
@@ -3343,7 +4106,7 @@ describe('Insync', function () {
 
                     c.push([5, 6], function (err, arg) {
 
-                        expect(c.running()).to.be.false();
+                        expect(c.running()).to.equal(0);
                         expect(err).to.exist();
                         expect(err.message).to.equal('5 6');
                         expect(arg).to.equal('5 6');
@@ -3354,7 +4117,7 @@ describe('Insync', function () {
 
                 setTimeout(function () {
 
-                    expect(c.running()).to.be.false();
+                    expect(c.running()).to.equal(0);
                     expect(callOrder).to.deep.equal([
                         'task 1 2', 'callback 1', 'callback 2',
                         'task 3 4', 'callback 3', 'callback 4',
@@ -3522,6 +4285,60 @@ describe('Insync', function () {
                 });
 
                 expect(c.length()).to.equal(4);
+            });
+
+            it('supports queue events', function (done) {
+
+                var calls = [];
+
+                var q = Insync.cargo(function (task, cb) {
+
+                    calls.push('process ' + task);
+                    setImmediate(cb);
+                }, 1);
+
+                q.concurrency = 3;
+
+                q.saturated = function () {
+
+                    expect(q.length()).to.equal(3);
+                    calls.push('saturated');
+                };
+
+                q.empty = function () {
+
+                    expect(q.length()).to.equal(0);
+                    calls.push('empty');
+                };
+
+                q.drain = function () {
+
+                    expect(q.length()).to.equal(0);
+                    expect(q.running()).to.equal(0);
+                    calls.push('drain');
+                    expect(calls).to.deep.equal([
+                        'saturated',
+                        'process foo',
+                        'process bar',
+                        'process zoo',
+                        'foo cb',
+                        'process poo',
+                        'bar cb',
+                        'empty',
+                        'process moo',
+                        'zoo cb',
+                        'poo cb',
+                        'moo cb',
+                        'drain'
+                    ]);
+                    done();
+                };
+
+                q.push('foo', function () { calls.push('foo cb'); });
+                q.push('bar', function () { calls.push('bar cb'); });
+                q.push('zoo', function () { calls.push('zoo cb'); });
+                q.push('poo', function () { calls.push('poo cb'); });
+                q.push('moo', function () { calls.push('moo cb'); });
             });
         });
     });
@@ -3835,23 +4652,75 @@ describe('Insync', function () {
             });
         });
 
-        describe('noConflict()', function () {
+        describe('ensureAsync()', function () {
 
-            it('returns a reference to the original Insync', function (done) {
+            it('defers synchronous functions', function (done) {
 
-                expect(Insync.noConflict()).to.equal(Insync);
+                var fn = Insync.ensureAsync(function(foo, bar, callback) {
+
+                    expect(foo).to.equal(5);
+                    expect(bar).to.equal(6);
+                    callback(null, 42);
+                    expect(sync).to.equal(true);
+                });
+
+                var sync = true;
+
+                fn(5, 6, function (err, result) {
+
+                    expect(sync).to.equal(false);
+                    expect(err).to.equal(null);
+                    expect(result).to.equal(42);
+                    done();
+                });
+                sync = false;
+            });
+
+            it('does not defer asynchronous functions', function (done) {
+
+                var fn = Insync.ensureAsync(function(foo, bar, callback) {
+
+                    expect(foo).to.equal(5);
+                    expect(bar).to.equal(6);
+                    setImmediate(function () {
+
+                        expect(sync).to.equal(false);
+                        sync = true;
+                        callback(null, 42);
+                        expect(sync).to.equal(true);
+                        sync = false;
+                    });
+                    expect(sync).to.equal(true);
+                });
+
+                var sync = true;
+
+                fn(5, 6, function (err, result) {
+
+                    expect(sync).to.equal(true);
+                    expect(err).to.equal(null);
+                    expect(result).to.equal(42);
+                    done();
+                });
+                sync = false;
+            });
+
+            it('throws if a callback is not provided', function (done) {
+
+                expect(function () {
+
+                    var fn = Insync.ensureAsync(function (foo, bar) {});
+                    fn(5, 6);
+                }).to.throw(TypeError, 'Last argument must be a function.');
                 done();
             });
         });
-    });
-
-    describe('Common', function () {
 
         describe('onlyOnce()', function () {
 
             it('does not throw if function is called once', function (done) {
 
-                var fn = Common.onlyOnce(Common.noop);
+                var fn = Util.onlyOnce(Util.noop);
 
                 expect(fn).to.not.throw();
                 done();
@@ -3859,10 +4728,46 @@ describe('Insync', function () {
 
             it('throws an error if function is called more than once', function (done) {
 
-                var fn = Common.onlyOnce(Common.noop);
+                var fn = Util.onlyOnce(Util.noop);
 
                 fn();
                 expect(fn).to.throw('Callback was already called.');
+                done();
+            });
+        });
+
+        describe('isArrayLike()', function () {
+
+            it('correctly identifies array like objects', function (done) {
+
+                expect(Util.isArrayLike([])).to.equal(true);
+                expect(Util.isArrayLike([1, 2])).to.equal(true);
+                expect(Util.isArrayLike(arguments)).to.equal(true);
+                expect(Util.isArrayLike({ length: 1 })).to.equal(true);
+                expect(Util.isArrayLike(undefined)).to.equal(false);
+                expect(Util.isArrayLike(null)).to.equal(false);
+                expect(Util.isArrayLike(true)).to.equal(false);
+                expect(Util.isArrayLike(false)).to.equal(false);
+                expect(Util.isArrayLike('')).to.equal(false);
+                expect(Util.isArrayLike('foo')).to.equal(false);
+                expect(Util.isArrayLike(0)).to.equal(false);
+                expect(Util.isArrayLike(1)).to.equal(false);
+                expect(Util.isArrayLike(NaN)).to.equal(false);
+                expect(Util.isArrayLike(Infinity)).to.equal(false);
+                expect(Util.isArrayLike(function(foo) {})).to.equal(false);
+                expect(Util.isArrayLike({})).to.equal(false);
+                expect(Util.isArrayLike({ foo: 'bar' })).to.equal(false);
+                expect(Util.isArrayLike({ length: '' })).to.equal(false);
+                expect(Util.isArrayLike({ length: '1' })).to.equal(false);
+                expect(Util.isArrayLike({ length: '0' })).to.equal(false);
+                expect(Util.isArrayLike({ length: true })).to.equal(false);
+                expect(Util.isArrayLike({ length: false })).to.equal(false);
+                expect(Util.isArrayLike({ length: null })).to.equal(false);
+                expect(Util.isArrayLike({ length: undefined })).to.equal(false);
+                expect(Util.isArrayLike({ length: NaN })).to.equal(false);
+                expect(Util.isArrayLike({ length: Infinity })).to.equal(false);
+                expect(Util.isArrayLike({ length: -1 })).to.equal(false);
+                expect(Util.isArrayLike({ length: 3.14 })).to.equal(false);
                 done();
             });
         });
