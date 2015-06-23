@@ -4741,14 +4741,8 @@ describe('Insync', function () {
             it('returns an object with a null prototype', function (done) {
 
                 var result = Util.hash();
-                expect(result.hasOwnKey).to.be.undefined();
-                done();
-            });
-
-            it('initializes values when supplied', function (done) {
-
-                var result = Util.hash({ foo: 1, bar: 2 });
-                expect(result).to.deep.equal({ foo: 1, bar: 2 }, { prototype: false });
+                expect(result.__proto__).to.be.undefined();
+                expect(result.hasOwnProperty).to.be.undefined();
                 done();
             });
         });
