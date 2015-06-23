@@ -2,7 +2,6 @@
 
 // Load Modules
 
-var Domain = require('domain');
 var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
@@ -3678,41 +3677,6 @@ describe('Insync', function () {
                     });
                     done();
                 });
-            });
-
-            it('calls callback multiple times', function (done) {
-
-                var domain = Domain.create();
-                var finalCallCount = 0;
-
-                domain.on('error', function (e) {
-
-                    // Ignore test error
-                    if (!e._testError) {
-                        return test.done(e);
-                    }
-                });
-
-                domain.run(function () {
-
-                    Insync.auto({
-                        task1: function (callback) { callback(null); },
-                        task2: ['task1', function (callback) { callback(null); }]
-                    }, function (err) {
-
-                        // Error throwing final callback. This should only run once
-                        finalCallCount++;
-                        var error = new Error();
-                        error._testError = true;
-                        throw error;
-                    });
-                });
-
-                setTimeout(function () {
-
-                    expect(finalCallCount).to.equal(1);
-                    done();
-                }, 100);
             });
 
             it('does not deadlock due to inexistant dependencies', function (done) {
