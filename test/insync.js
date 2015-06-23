@@ -3324,34 +3324,6 @@ describe('Insync', function () {
                 });
             });
 
-            it('retries with interval when all attempts succeed', function (done) {
-
-                var times = 3;
-                var interval = 100;
-                var callCount = 0;
-
-                var fn = function (callback) {
-
-                    callCount++;
-                    callback(new Error(callCount), callCount);
-                };
-
-                var start = Date.now();
-
-                Insync.retry({ times: times, interval: interval }, fn, function (err, result) {
-
-                    var elapsed = Date.now() - start;
-
-                    expect(elapsed > (interval * (times - 1))).to.equal(true);
-                    expect(callCount).to.equal(3);
-                    expect(err).to.exist();
-                    expect(err.message).to.equal(callCount + '');
-                    expect(result).to.exist();
-                    expect(result).to.equal(callCount);
-                    done();
-                });
-            });
-
             it('uses default number of retries', function (done) {
 
                 var times = 5;
