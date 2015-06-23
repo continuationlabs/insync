@@ -1,0 +1,9 @@
+{
+ "extends": "./node_modules/lab/lib/linters/eslint/.eslintrc",
+ "parser": "babel-eslint",
+ "rules": {
+    "lines-around-comment": 0,
+    "no-shadow": 0,
+    "hapi/hapi-scope-start": [1, "allow-one-liners", 2]
+ }
+}
