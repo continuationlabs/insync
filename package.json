@@ -3,7 +3,7 @@
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "main": "build/index.js",
   "author": "Continuation Labs",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "homepage": "https://github.com/continuationlabs/insync",
   "repository": {
     "type": "git",
