@@ -1,9 +1,9 @@
-![Insync](https://raw.github.com/cjihrig/insync/master/images/insync.png)
+![Insync](https://raw.github.com/continuationlabs/insync/master/images/insync.png)
 
 [![Current Version](https://img.shields.io/npm/v/insync.svg)](https://www.npmjs.org/package/insync)
-[![Build Status via Travis CI](https://travis-ci.org/cjihrig/insync.svg?branch=master)](https://travis-ci.org/cjihrig/insync)
-![Dependencies](http://img.shields.io/david/cjihrig/insync.svg)
-![devDependencies](http://img.shields.io/david/dev/cjihrig/insync.svg)
+[![Build Status via Travis CI](https://travis-ci.org/continuationlabs/insync.svg?branch=master)](https://travis-ci.org/continuationlabs/insync)
+![Dependencies](http://img.shields.io/david/continuationlabs/insync.svg)
+![devDependencies](http://img.shields.io/david/dev/continuationlabs/insync.svg)
 
 Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async was the goal for version 1.0.0.
 
@@ -132,7 +132,7 @@ Insync.map([1, 2, 3], AsyncSquaringLibrary.square.bind(AsyncSquaringLibrary), fu
 
 ## Download
 
-The source is available for download from [GitHub](http://github.com/cjihrig/insync). Alternatively, you can install using `npm`:
+The source is available for download from [GitHub](http://github.com/continuationlabs/insync). Alternatively, you can install using `npm`:
 
     npm install insync
 
