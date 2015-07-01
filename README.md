@@ -1290,16 +1290,16 @@ Insync.auto({
 will have the effect of calling `readFile` with the results object as the last argument, which will fail:
 
 ```javascript
-fs.readFile('data.txt', 'utf-8', cb, {});
+fs.readFile('data.txt', 'utf-8', callback, {});
 ```
 
 Instead, wrap the call to `readFile` in a function which does not forward the `results` object:
 
 ```javascript
 Insync.auto({
-    readData: function (cb, results) {
+    readData: function (callback, results) {
 
-        fs.readFile('data.txt', 'utf-8', cb);
+        fs.readFile('data.txt', 'utf-8', callback);
     }
 }, callback);
 ```
