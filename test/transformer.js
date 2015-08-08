@@ -1,5 +1,5 @@
 'use strict';
-var Babel = require('babel-core');
+var Babel = require('babel');
 
 
 module.exports = [
