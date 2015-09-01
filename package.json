@@ -1,6 +1,6 @@
 {
   "name": "insync",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "author": "Continuation Labs <contact@continuation.io> (http://continuation.io/)",
   "main": "build/index.js",
@@ -17,6 +17,7 @@
     "babel": "5.x.x",
     "code": "1.x.x",
     "eslint": "1.x.x",
+    "eslint-config-hapi": "1.x.x",
     "eslint-plugin-hapi": "1.x.x",
     "lab": "5.x.x"
   },

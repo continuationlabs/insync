@@ -1,12 +1,6 @@
 {
- "extends": "./node_modules/lab/lib/linters/eslint/.eslintrc",
- "env": {
-    "node": true,
-    "es6": true
- },
+ "extends": "eslint-config-hapi",
  "rules": {
-    "lines-around-comment": 0,
-    "no-shadow": 0,
     "hapi/hapi-scope-start": [1, "allow-one-liners", 2],
     "hapi/no-shadow-relaxed": 0
  }
