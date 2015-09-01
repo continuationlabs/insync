@@ -1954,17 +1954,19 @@ describe('Insync', function () {
                         setTimeout(function () {
 
                             callOrder.push(1);
-                            callback(new Error('foo'));
+                            callback(new Error('foo'), arg0, 5);
                         }, 2);
                     },
                     function (callback) {
 
                         expect(false).to.equal(true);
                     }
-                ], function (err) {
+                ], function (err, arg1, arg2) {
 
                     expect(err).to.exist();
                     expect(callOrder).to.deep.equal([0, 1]);
+                    expect(arg1).to.equal(0);
+                    expect(arg2).to.equal(5);
                     done();
                 });
             });
