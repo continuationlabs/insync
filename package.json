@@ -17,7 +17,7 @@
     "babel": "5.x.x",
     "code": "1.x.x",
     "eslint": "1.x.x",
-    "eslint-config-hapi": "1.x.x",
+    "eslint-config-hapi": "2.x.x",
     "eslint-plugin-hapi": "1.x.x",
     "lab": "5.x.x"
   },
