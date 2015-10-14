@@ -1,6 +1,6 @@
 {
   "name": "insync",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Higher-order functions and common patterns for asynchronous code. Node specific port of async.",
   "author": "Continuation Labs <contact@continuation.io> (http://continuation.io/)",
   "main": "build/index.js",
