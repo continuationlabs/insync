@@ -3,7 +3,6 @@
 [![Current Version](https://img.shields.io/npm/v/insync.svg)](https://www.npmjs.org/package/insync)
 [![Build Status via Travis CI](https://travis-ci.org/continuationlabs/insync.svg?branch=master)](https://travis-ci.org/continuationlabs/insync)
 ![Dependencies](http://img.shields.io/david/continuationlabs/insync.svg)
-![devDependencies](http://img.shields.io/david/dev/continuationlabs/insync.svg)
 
 Port of [async](https://github.com/caolan/async) that focuses strictly on Node.js. This project started as a direct fork of async. Feature parity with async was the goal for version 1.0.0.
 
